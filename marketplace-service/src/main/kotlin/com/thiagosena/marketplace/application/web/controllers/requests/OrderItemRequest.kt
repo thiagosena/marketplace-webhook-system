@@ -1,5 +1,6 @@
 package com.thiagosena.marketplace.application.web.controllers.requests
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.validation.constraints.DecimalMin
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Positive
@@ -29,6 +30,9 @@ data class OrderItemRequest(
     )
     val tax: BigDecimal = BigDecimal.ZERO
 ) {
+    @JsonIgnore
     fun getSubtotal(): BigDecimal = unitPrice.multiply(BigDecimal(quantity))
+
+    @JsonIgnore
     fun getTotal(): BigDecimal = getSubtotal().subtract(discount).add(tax)
 }

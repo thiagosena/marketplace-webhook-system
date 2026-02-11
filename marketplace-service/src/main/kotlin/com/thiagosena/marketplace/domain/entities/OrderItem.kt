@@ -1,24 +1,48 @@
 package com.thiagosena.marketplace.domain.entities
 
-import jakarta.persistence.Column
-import jakarta.persistence.Embeddable
+import com.fasterxml.jackson.annotation.JsonIgnore
+import jakarta.persistence.*
+import org.hibernate.annotations.Fetch
+import org.hibernate.annotations.FetchMode
 import java.math.BigDecimal
+import java.util.*
 
-@Embeddable
+@Entity
+@Table(name = "order_items")
 data class OrderItem(
+    @Id
+    @GeneratedValue
+    val id: UUID? = null,
 
-    @Column(name = "product_name")
-    val productName: String? = null,
+    @Column(name = "product_name", nullable = false)
+    val productName: String,
 
-    @Column(nullable = false)
+    @Column(name = "quantity", nullable = false)
     val quantity: Int,
 
     @Column(name = "unit_price", nullable = false, precision = 10, scale = 2)
     val unitPrice: BigDecimal,
 
-    @Column(name = "discount", precision = 10, scale = 2)
+    @Column(name = "discount", nullable = false, precision = 10, scale = 2)
     val discount: BigDecimal = BigDecimal.ZERO,
 
-    @Column(name = "tax", precision = 10, scale = 2)
-    val tax: BigDecimal = BigDecimal.ZERO
-)
+    @Column(name = "tax", nullable = false, precision = 10, scale = 2)
+    val tax: BigDecimal = BigDecimal.ZERO,
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false, foreignKey = ForeignKey(name = "FK_ORDER_ID"))
+    @Fetch(FetchMode.JOIN)
+    val order: Order
+) {
+    override fun toString() = """
+            OrderItem(
+                id=$id, 
+                productName=$productName, 
+                quantity=$quantity, 
+                unitPrice=$unitPrice, 
+                discount=$discount, 
+                tax=$tax
+            )
+        """.trimIndent()
+}

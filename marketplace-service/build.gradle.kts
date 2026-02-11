@@ -8,6 +8,7 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
     jacoco
 }
+val basePath = "com/thiagosena/marketplace"
 extra["springCloudVersion"] = "2025.1.1"
 group = "com.thiagosena"
 version = "1.0.0"
@@ -21,6 +22,31 @@ java {
 
 repositories {
     mavenCentral()
+}
+
+tasks.test {
+    finalizedBy("jacocoTestReport")
+}
+
+tasks.build {
+    finalizedBy("jacocoTestCoverageVerification", "integrationTest", "archTest")
+}
+
+tasks.detekt {
+    dependsOn("ktlintCheck")
+}
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+    reports {
+        html {
+            required.set(true)
+            outputLocation.set(file("build/reports/detekt/detekt.html"))
+        }
+    }
+}
+detekt {
+    source.from(files("src/main"))
+    config.from(files("detekt-config.yml"))
+    buildUponDefaultConfig = true
 }
 
 // Integration Test
@@ -69,7 +95,11 @@ jacoco {
     toolVersion = "0.8.13"
 }
 
-val excludePackages: Iterable<String> = listOf("generated.*")
+val excludePackages: Iterable<String> = listOf(
+    "**/$basePath/application/**",
+    "**/$basePath/domain/entities/**",
+    "**/$basePath/MarketplaceApplication*",
+)
 extra["excludePackages"] = excludePackages
 
 tasks.withType<Test> {
@@ -131,8 +161,6 @@ val tngTechArchUnitVersion = "1.4.1"
 val feignVersion = "13.7"
 val mockkVersion = "1.14.9"
 val awaitilityVersion = "4.3.0"
-val elasticmqVersion = "1.6.15"
-val awsSdkVersion = "2.41.24"
 val restAssuredVersion = "6.0.0"
 dependencies {
     // Kotlin adapters
@@ -145,26 +173,17 @@ dependencies {
     }
     implementation("org.springframework.boot:spring-boot-starter-jetty")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocVersion")
-
 
     // Database
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.postgresql:postgresql")
-    implementation("org.flywaydb:flyway-core")
+    implementation("org.springframework.boot:spring-boot-starter-flyway")
+    implementation("org.flywaydb:flyway-database-postgresql")
 
     // Observability
     implementation("org.springframework.boot:spring-boot-starter-actuator")
-
-    // Feign
-    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
-    implementation("io.github.openfeign:feign-jackson:$feignVersion")
-    implementation("io.github.openfeign:feign-okhttp:$feignVersion")
-
-    // AWS SQS
-    implementation("software.amazon.awssdk:aws-core:$awsSdkVersion")
-    implementation("software.amazon.awssdk:sqs:$awsSdkVersion")
 
     // Unit Test
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
@@ -173,7 +192,7 @@ dependencies {
     }
     testImplementation("org.junit.jupiter:junit-jupiter-params")
     testImplementation("io.mockk:mockk:$mockkVersion")
-
+    testImplementation(kotlin("test"))
 
     // Arch Test
     archTestImplementation("com.tngtech.archunit:archunit-junit5-api:$tngTechArchUnitVersion")
@@ -183,19 +202,23 @@ dependencies {
     integrationTestImplementation("org.springframework.boot:spring-boot-starter-test") {
         exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
     }
+    integrationTestImplementation("org.springframework.boot:spring-boot-starter-webflux")
     integrationTestImplementation("org.awaitility:awaitility-kotlin:$awaitilityVersion")
     integrationTestImplementation("org.springframework.cloud:spring-cloud-contract-wiremock")
     integrationTestImplementation("io.rest-assured:rest-assured:$restAssuredVersion")
     integrationTestImplementation("io.rest-assured:json-path:$restAssuredVersion")
     integrationTestImplementation("io.rest-assured:kotlin-extensions:$restAssuredVersion")
-    testImplementation(kotlin("test"))
-
-    integrationTestImplementation("org.elasticmq:elasticmq-rest-sqs_3:$elasticmqVersion")
+    integrationTestImplementation("org.springframework.boot:spring-boot-testcontainers")
+    integrationTestImplementation("org.testcontainers:junit-jupiter")
+    integrationTestImplementation("org.testcontainers:postgresql")
+    integrationTestImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 dependencyManagement {
     imports {
         mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
+        mavenBom("org.testcontainers:testcontainers-bom:1.19.8")
     }
 }
 
@@ -207,6 +230,7 @@ kotlin {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    systemProperty("api.version", "1.44")
 }
 
 springBoot { buildInfo() }

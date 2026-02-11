@@ -1,5 +1,6 @@
 server:
-  port: ${SERVER_PORT:8000}
+  port: ${SERVER_PORT:7000}
+  shutdown: graceful
 
 spring:
   main:
@@ -7,9 +8,8 @@ spring:
   application:
     name: marketplace-service
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/marketplace}
-    username: ${DATABASE_USER:postgres}
-    password: ${DATABASE_PASSWORD:admin}
+    username: ${DATABASE_USER:test}
+    password: ${DATABASE_PASSWORD:test}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:

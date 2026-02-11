@@ -29,7 +29,7 @@ vendor/
 # Environment
 .env
 .env.local
-*.env
+variables.local.env
 
 # OS
 .DS_Store
