@@ -1,7 +1,7 @@
 package com.thiagosena.marketplace.domain.entities
 
-import com.thiagosena.marketplace.application.web.controllers.responses.CreateOrderResponse
 import com.thiagosena.marketplace.application.web.controllers.responses.OrderItemResponse
+import com.thiagosena.marketplace.application.web.controllers.responses.OrderResponse
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -12,8 +12,6 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
-import org.hibernate.annotations.Fetch
-import org.hibernate.annotations.FetchMode
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
@@ -37,7 +35,6 @@ data class Order(
         cascade = [CascadeType.PERSIST, CascadeType.MERGE],
         orphanRemoval = true,
     )
-    @Fetch(FetchMode.SELECT)
     val items: MutableList<OrderItem> = mutableListOf(),
     @Column(name = "created_at", nullable = false, updatable = false)
     val createdAt: LocalDateTime = LocalDateTime.now(),
@@ -59,15 +56,15 @@ data class Order(
             storeId=$storeId, 
             status=$status, 
             totalAmount=$totalAmount
-            items=$items
             createdAt=$createdAt
             updatedAt=$updatedAt
+            items=$items
         )
         """.trimIndent()
 
-    fun toResponse(): CreateOrderResponse =
+    fun toResponse(): OrderResponse =
         id?.let {
-            CreateOrderResponse(
+            OrderResponse(
                 it.toString(),
                 storeId,
                 items.map { item ->
@@ -81,6 +78,17 @@ data class Order(
                 },
             )
         } ?: error("Order ID cannot be null when converting to response")
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Order
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int = id?.hashCode() ?: 0
 }
 
 enum class OrderStatus {

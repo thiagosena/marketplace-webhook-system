@@ -1,5 +1,6 @@
 package com.thiagosena.marketplace.application.web.controllers
 
+import com.jayway.jsonpath.JsonPath
 import com.thiagosena.marketplace.MarketplaceApplication
 import com.thiagosena.marketplace.application.config.TestcontainersConfiguration
 import com.thiagosena.marketplace.domain.entities.EventType
@@ -17,18 +18,17 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDO
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
-import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
+import java.util.*
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = [MarketplaceApplication::class])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Import(TestcontainersConfiguration::class)
 class OrderControllerTest(
-    @Autowired val orderJpaRepository: OrderJpaRepository,
-    @Autowired val outboxEventJpaRepository: OutboxEventJpaRepository,
-    @Autowired val jdbcTemplate: JdbcTemplate,
+    @param:Autowired val orderJpaRepository: OrderJpaRepository,
+    @param:Autowired val outboxEventJpaRepository: OutboxEventJpaRepository,
 ) {
     @LocalServerPort
     private var port: Int = 0
@@ -46,7 +46,6 @@ class OrderControllerTest(
 
     @AfterEach
     fun cleanup() {
-        jdbcTemplate.execute("DELETE FROM order_items")
         outboxEventJpaRepository.deleteAll()
         orderJpaRepository.deleteAll()
     }
@@ -116,5 +115,65 @@ class OrderControllerTest(
 
         assertThat(orderJpaRepository.count()).isEqualTo(0)
         assertThat(outboxEventJpaRepository.count()).isEqualTo(0)
+    }
+
+    @Test
+    fun `get order by id returns ok with order response`() {
+        val payload =
+            """
+            {
+              "store_id": "store-1",
+              "items": [
+                {
+                  "product_name": "Product A",
+                  "quantity": 2,
+                  "unit_price": 9.95,
+                  "discount": 1.00,
+                  "tax": 0.50
+                }
+              ]
+            }
+            """.trimIndent()
+
+        val createdOrderId =
+            webTestClient
+                .post()
+                .uri("/api/v1/orders")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .exchange()
+                .expectStatus()
+                .isCreated
+                .expectBody(String::class.java)
+                .returnResult()
+                .responseBody
+                ?.let { JsonPath.read<String>(it, "$.id") }
+                ?: error("Order ID not found")
+
+        webTestClient
+            .get()
+            .uri("/api/v1/orders/$createdOrderId")
+            .exchange()
+            .expectStatus()
+            .isOk
+            .expectHeader()
+            .contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
+            .expectBody()
+            .jsonPath("$.id")
+            .isEqualTo(createdOrderId)
+            .jsonPath("$.store_id")
+            .isEqualTo("store-1")
+    }
+
+    @Test
+    fun `get order by id when order does not exist returns not found`() {
+        val missingId = UUID.randomUUID()
+
+        webTestClient
+            .get()
+            .uri("/api/v1/orders/$missingId")
+            .exchange()
+            .expectStatus()
+            .isNotFound
     }
 }

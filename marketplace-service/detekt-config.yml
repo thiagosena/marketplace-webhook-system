@@ -91,6 +91,7 @@ complexity:
     ignoreAnnotation: true
     excludeStringsWithLessThanFiveCharacters: true
     ignoreStringsRegex: "$^"
+    excludes: [ "**/test/**", "**/integrationTest/**", "**/archTest/**" ]
   TooManyFunctions:
     active: true
     excludes: [ "**/test/**", "**/integrationTest/**", "**/archTest/**" ]
@@ -213,6 +214,7 @@ naming:
     active: true
     functionPattern: "[a-z][a-zA-Z0-9]*"
     excludeClassPattern: "$^"
+    excludes: [ "**/test/**", "**/integrationTest/**", "**/archTest/**" ]
   FunctionParameterNaming:
     active: true
     parameterPattern: "[a-z][a-zA-Z0-9]*"
@@ -257,6 +259,7 @@ performance:
     active: true
   SpreadOperator:
     active: true
+    excludes: ['**/MarketplaceApplication.kt']
   UnnecessaryTemporaryInstantiation:
     active: true
 
@@ -280,6 +283,7 @@ potential-bugs:
     active: true
   LateinitUsage:
     active: true
+    excludes: [ "**/test/**", "**/integrationTest/**", "**/archTest/**" ]
   MissingWhenCase:
     active: true
   RedundantElseInWhen:

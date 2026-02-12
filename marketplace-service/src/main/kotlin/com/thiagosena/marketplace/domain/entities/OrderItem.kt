@@ -10,8 +10,6 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
-import org.hibernate.annotations.Fetch
-import org.hibernate.annotations.FetchMode
 import java.math.BigDecimal
 import java.util.*
 
@@ -34,7 +32,6 @@ data class OrderItem(
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false, foreignKey = ForeignKey(name = "FK_ORDER_ID"))
-    @Fetch(FetchMode.JOIN)
     val order: Order,
 ) {
     override fun toString() =
@@ -48,4 +45,15 @@ data class OrderItem(
             tax=$tax
         )
         """.trimIndent()
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as OrderItem
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int = id?.hashCode() ?: 0
 }

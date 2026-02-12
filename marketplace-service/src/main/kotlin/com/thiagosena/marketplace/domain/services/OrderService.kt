@@ -1,16 +1,20 @@
 package com.thiagosena.marketplace.domain.services
 
-import com.thiagosena.marketplace.application.web.controllers.responses.CreateOrderResponse
+import com.thiagosena.marketplace.application.web.controllers.responses.OrderResponse
 import com.thiagosena.marketplace.domain.entities.AggregateType
 import com.thiagosena.marketplace.domain.entities.EventType
 import com.thiagosena.marketplace.domain.entities.Order
 import com.thiagosena.marketplace.domain.entities.OutboxEvent
+import com.thiagosena.marketplace.domain.exceptions.ErrorType
+import com.thiagosena.marketplace.domain.exceptions.OrderNotFoundException
 import com.thiagosena.marketplace.domain.repositories.OrderRepository
 import com.thiagosena.marketplace.domain.repositories.OutboxEventRepository
 import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import tools.jackson.databind.ObjectMapper
+import java.util.*
 
 @Service
 class OrderService(
@@ -21,7 +25,7 @@ class OrderService(
     private val logger = LoggerFactory.getLogger(OrderService::class.java)
 
     @Transactional
-    fun createOrder(order: Order): CreateOrderResponse {
+    fun createOrder(order: Order): OrderResponse {
         logger.debug("Creating order: {}", order)
 
         return orderRepository
@@ -41,4 +45,11 @@ class OrderService(
                     }
             }.toResponse()
     }
+
+    fun findById(orderId: UUID) =
+        orderRepository.findById(orderId)?.toResponse() ?: throw OrderNotFoundException(
+            HttpStatus.NOT_FOUND,
+            ErrorType.ORDER_NOT_FOUND.name,
+            "Order with id=$orderId not found",
+        )
 }
