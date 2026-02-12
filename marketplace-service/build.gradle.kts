@@ -24,6 +24,10 @@ repositories {
     mavenCentral()
 }
 
+ktlint {
+    version.set("1.8.0")
+}
+
 tasks.test {
     finalizedBy("jacocoTestReport")
 }
@@ -32,6 +36,7 @@ tasks.build {
     finalizedBy("jacocoTestCoverageVerification", "integrationTest", "archTest")
 }
 
+// Detekt
 tasks.detekt {
     dependsOn("ktlintCheck")
 }
@@ -56,13 +61,14 @@ sourceSets {
         runtimeClasspath += sourceSets.main.get().output + sourceSets.test.get().output
     }
 }
-val integrationTestTask = tasks.register("integrationTest", Test::class.java) {
-    description = "Runs the integration tests."
-    group = "verification"
+val integrationTestTask =
+    tasks.register("integrationTest", Test::class.java) {
+        description = "Runs the integration tests."
+        group = "verification"
 
-    testClassesDirs = sourceSets["integrationTest"].output.classesDirs
-    classpath = sourceSets["integrationTest"].runtimeClasspath
-}
+        testClassesDirs = sourceSets["integrationTest"].output.classesDirs
+        classpath = sourceSets["integrationTest"].runtimeClasspath
+    }
 val integrationTestImplementation: Configuration by configurations.getting {
     extendsFrom(configurations.implementation.get())
     extendsFrom(configurations.testImplementation.get())
@@ -77,13 +83,14 @@ sourceSets {
         runtimeClasspath += sourceSets.main.get().output
     }
 }
-val archTest = tasks.register("archTest", Test::class.java) {
-    description = "Runs the architecture tests."
-    group = "verification"
+val archTest =
+    tasks.register("archTest", Test::class.java) {
+        description = "Runs the architecture tests."
+        group = "verification"
 
-    testClassesDirs = sourceSets["archTest"].output.classesDirs
-    classpath = sourceSets["archTest"].runtimeClasspath
-}
+        testClassesDirs = sourceSets["archTest"].output.classesDirs
+        classpath = sourceSets["archTest"].runtimeClasspath
+    }
 val archTestImplementation: Configuration by configurations.getting {
     extendsFrom(configurations.implementation.get())
     extendsFrom(configurations.testImplementation.get())
@@ -95,24 +102,29 @@ jacoco {
     toolVersion = "0.8.13"
 }
 
-val excludePackages: Iterable<String> = listOf(
-    "**/$basePath/application/**",
-    "**/$basePath/domain/entities/**",
-    "**/$basePath/MarketplaceApplication*",
-)
+val excludePackages: Iterable<String> =
+    listOf(
+        "**/$basePath/application/**",
+        "**/$basePath/domain/entities/**",
+        "**/$basePath/MarketplaceApplication*",
+    )
 extra["excludePackages"] = excludePackages
 
 tasks.withType<Test> {
     loadEnv(environment, file("variables.test.env"))
 }
 
-fun loadEnv(environment: MutableMap<String, Any>, file: File) {
+fun loadEnv(
+    environment: MutableMap<String, Any>,
+    file: File,
+) {
     require(file.exists())
 
     file.readLines().forEach { line ->
         if (line.isBlank() || line.startsWith("#")) return@forEach
 
-        line.split("=", limit = 2)
+        line
+            .split("=", limit = 2)
             .takeIf { it.size == 2 && it[0].isNotBlank() }
             ?.run { Pair(this[0].trim(), this[1].trim()) }
             ?.run { environment[first] = second }
@@ -129,7 +141,7 @@ tasks.jacocoTestReport {
     classDirectories.setFrom(
         sourceSets.main.get().output.asFileTree.matching {
             exclude(excludePackages)
-        }
+        },
     )
 }
 
@@ -152,7 +164,7 @@ tasks.jacocoTestCoverageVerification {
     classDirectories.setFrom(
         sourceSets.main.get().output.asFileTree.matching {
             exclude(excludePackages)
-        }
+        },
     )
 }
 

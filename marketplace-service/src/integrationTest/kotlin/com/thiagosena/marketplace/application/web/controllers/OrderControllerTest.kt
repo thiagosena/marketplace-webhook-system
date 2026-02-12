@@ -21,7 +21,6 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
 
-
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = [MarketplaceApplication::class])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -29,9 +28,8 @@ import org.springframework.test.web.reactive.server.WebTestClient
 class OrderControllerTest(
     @Autowired val orderJpaRepository: OrderJpaRepository,
     @Autowired val outboxEventJpaRepository: OutboxEventJpaRepository,
-    @Autowired val jdbcTemplate: JdbcTemplate
+    @Autowired val jdbcTemplate: JdbcTemplate,
 ) {
-
     @LocalServerPort
     private var port: Int = 0
 
@@ -39,9 +37,11 @@ class OrderControllerTest(
 
     @BeforeEach
     fun setupWebClient() {
-        webTestClient = WebTestClient.bindToServer()
-            .baseUrl("http://localhost:$port")
-            .build()
+        webTestClient =
+            WebTestClient
+                .bindToServer()
+                .baseUrl("http://localhost:$port")
+                .build()
     }
 
     @AfterEach
@@ -53,7 +53,8 @@ class OrderControllerTest(
 
     @Test
     fun `create order returns ok and persists order and outbox event`() {
-        val payload = """
+        val payload =
+            """
             {
               "store_id": "store-1",
               "items": [
@@ -73,13 +74,15 @@ class OrderControllerTest(
                 }
               ]
             }
-        """.trimIndent()
-        webTestClient.post()
+            """.trimIndent()
+        webTestClient
+            .post()
             .uri("/api/v1/orders")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(payload)
             .exchange()
-            .expectStatus().isCreated
+            .expectStatus()
+            .isCreated
 
         assertThat(orderJpaRepository.count()).isEqualTo(1)
         assertThat(outboxEventJpaRepository.count()).isEqualTo(1)
@@ -95,18 +98,21 @@ class OrderControllerTest(
 
     @Test
     fun `create order with invalid payload returns bad request and does not persist`() {
-        val payload = """
+        val payload =
+            """
             {
               "store_id": "",
               "items": []
             }
-        """.trimIndent()
-        webTestClient.post()
+            """.trimIndent()
+        webTestClient
+            .post()
             .uri("/api/v1/orders")
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(payload)
             .exchange()
-            .expectStatus().isBadRequest
+            .expectStatus()
+            .isBadRequest
 
         assertThat(orderJpaRepository.count()).isEqualTo(0)
         assertThat(outboxEventJpaRepository.count()).isEqualTo(0)

@@ -23,6 +23,10 @@ repositories {
     mavenCentral()
 }
 
+ktlint {
+    version.set("1.8.0")
+}
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")

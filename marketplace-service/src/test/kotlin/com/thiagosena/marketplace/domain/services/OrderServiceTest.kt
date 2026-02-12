@@ -15,10 +15,9 @@ import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import tools.jackson.databind.ObjectMapper
 import java.math.BigDecimal
-import java.util.*
+import java.util.UUID
 
 class OrderServiceTest {
-
     private val orderRepository = mockk<OrderRepository>()
     private val outboxEventRepository = mockk<OutboxEventRepository>()
     private val objectMapper = mockk<ObjectMapper>()
@@ -26,10 +25,11 @@ class OrderServiceTest {
 
     @Test
     fun `createOrder saves order and creates outbox event`() {
-        val order = Order(
-            storeId = "store-123",
-            totalAmount = BigDecimal("25.50")
-        )
+        val order =
+            Order(
+                storeId = "store-123",
+                totalAmount = BigDecimal("25.50"),
+            )
         val savedOrder = order.copy(id = UUID.randomUUID())
 
         every { orderRepository.save(order) } returns savedOrder
@@ -53,10 +53,11 @@ class OrderServiceTest {
 
     @Test
     fun `createOrder throws when saved order has null id`() {
-        val order = Order(
-            storeId = "store-999",
-            totalAmount = BigDecimal("10.00")
-        )
+        val order =
+            Order(
+                storeId = "store-999",
+                totalAmount = BigDecimal("10.00"),
+            )
 
         every { orderRepository.save(order) } returns order
         every { objectMapper.writeValueAsString(order) } returns """{"id": null}"""

@@ -16,7 +16,7 @@ import tools.jackson.databind.ObjectMapper
 class OrderService(
     private val orderRepository: OrderRepository,
     private val outboxEventRepository: OutboxEventRepository,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: ObjectMapper,
 ) {
     private val logger = LoggerFactory.getLogger(OrderService::class.java)
 
@@ -24,18 +24,21 @@ class OrderService(
     fun createOrder(order: Order): CreateOrderResponse {
         logger.debug("Creating order: {}", order)
 
-        return orderRepository.save(order).also { orderSaved ->
-            logger.info("Order created: {}", orderSaved)
-            outboxEventRepository.save(
-                OutboxEvent(
-                    eventType = EventType.ORDER_CREATED.type,
-                    payload = objectMapper.writeValueAsString(order),
-                    aggregateId = orderSaved.id ?: error("Order ID cannot be null"),
-                    aggregateType = AggregateType.ORDER,
-                )
-            ).also {
-                logger.info("Outbox event created: {}", it)
-            }
-        }.toResponse()
+        return orderRepository
+            .save(order)
+            .also { orderSaved ->
+                logger.info("Order created: {}", orderSaved)
+                outboxEventRepository
+                    .save(
+                        OutboxEvent(
+                            eventType = EventType.ORDER_CREATED.type,
+                            payload = objectMapper.writeValueAsString(order),
+                            aggregateId = orderSaved.id ?: error("Order ID cannot be null"),
+                            aggregateType = AggregateType.ORDER,
+                        ),
+                    ).also {
+                        logger.info("Outbox event created: {}", it)
+                    }
+            }.toResponse()
     }
 }
