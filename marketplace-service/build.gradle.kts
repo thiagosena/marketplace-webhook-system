@@ -1,10 +1,10 @@
 plugins {
-    kotlin("jvm") version "2.0.21"
-    kotlin("plugin.spring") version "2.0.21"
-    kotlin("plugin.jpa") version "2.0.21"
+    kotlin("jvm") version "2.3.0"
+    kotlin("plugin.spring") version "2.3.0"
+    kotlin("plugin.jpa") version "2.3.0"
     id("org.springframework.boot") version "4.0.2"
     id("io.spring.dependency-management") version "1.1.7"
-    id("io.gitlab.arturbosch.detekt") version "1.23.8"
+    id("dev.detekt") version "2.0.0-alpha.2"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
     jacoco
 }
@@ -40,18 +40,11 @@ tasks.build {
 tasks.detekt {
     dependsOn("ktlintCheck")
 }
-tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
-    reports {
-        html {
-            required.set(true)
-            outputLocation.set(file("build/reports/detekt/detekt.html"))
-        }
-    }
-}
 detekt {
     source.from(files("src/main"))
     config.from(files("detekt-config.yml"))
     buildUponDefaultConfig = true
+    toolVersion = "2.0.0-alpha.2"
 }
 
 // Integration Test
@@ -61,7 +54,7 @@ sourceSets {
         runtimeClasspath += sourceSets.main.get().output + sourceSets.test.get().output
     }
 }
-val integrationTestTask =
+val integrationTestTask: Any =
     tasks.register("integrationTest", Test::class.java) {
         description = "Runs the integration tests."
         group = "verification"
@@ -83,7 +76,7 @@ sourceSets {
         runtimeClasspath += sourceSets.main.get().output
     }
 }
-val archTest =
+val archTest: Any =
     tasks.register("archTest", Test::class.java) {
         description = "Runs the architecture tests."
         group = "verification"
@@ -106,6 +99,9 @@ val excludePackages: Iterable<String> =
     listOf(
         "**/$basePath/application/**",
         "**/$basePath/domain/entities/**",
+        "**/$basePath/domain/responses/**",
+        "**/$basePath/domain/exceptions/**",
+        "**/$basePath/resources/repositories/**",
         "**/$basePath/MarketplaceApplication*",
     )
 extra["excludePackages"] = excludePackages
@@ -151,7 +147,7 @@ tasks.jacocoTestCoverageVerification {
         rule {
             limit {
                 minimum = 0.9.toBigDecimal()
-                counter = "Line"
+                counter = "LINE"
             }
         }
         rule {

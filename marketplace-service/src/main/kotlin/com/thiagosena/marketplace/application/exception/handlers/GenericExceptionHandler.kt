@@ -11,7 +11,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @ControllerAdvice
 class GenericExceptionHandler : ResponseEntityExceptionHandler() {
-    private val logger = LoggerFactory.getLogger(GenericExceptionHandler::class.java)
+    private val log = LoggerFactory.getLogger(GenericExceptionHandler::class.java)
 
     @ExceptionHandler(OrderNotFoundException::class)
     fun handleOrderNotFoundException(ex: OrderNotFoundException): ResponseEntity<Any> {
@@ -21,7 +21,7 @@ class GenericExceptionHandler : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(Exception::class)
     fun handleException(ex: Exception): ResponseEntity<Any> {
-        logger.error("Error processing request", ex)
+        log.error("Error processing request", ex)
         val response = ApiError(HttpStatus.INTERNAL_SERVER_ERROR.name, ex.message)
         return ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR)
     }

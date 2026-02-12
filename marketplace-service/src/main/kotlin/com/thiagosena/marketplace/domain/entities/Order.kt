@@ -1,7 +1,7 @@
 package com.thiagosena.marketplace.domain.entities
 
-import com.thiagosena.marketplace.application.web.controllers.responses.OrderItemResponse
-import com.thiagosena.marketplace.application.web.controllers.responses.OrderResponse
+import com.thiagosena.marketplace.domain.responses.OrderItemResponse
+import com.thiagosena.marketplace.domain.responses.OrderResponse
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity

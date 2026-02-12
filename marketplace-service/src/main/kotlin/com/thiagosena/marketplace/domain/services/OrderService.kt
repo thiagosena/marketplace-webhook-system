@@ -1,6 +1,5 @@
 package com.thiagosena.marketplace.domain.services
 
-import com.thiagosena.marketplace.application.web.controllers.responses.OrderResponse
 import com.thiagosena.marketplace.domain.entities.AggregateType
 import com.thiagosena.marketplace.domain.entities.EventType
 import com.thiagosena.marketplace.domain.entities.Order
@@ -22,16 +21,16 @@ class OrderService(
     private val outboxEventRepository: OutboxEventRepository,
     private val objectMapper: ObjectMapper,
 ) {
-    private val logger = LoggerFactory.getLogger(OrderService::class.java)
+    private val log = LoggerFactory.getLogger(OrderService::class.java)
 
     @Transactional
-    fun createOrder(order: Order): OrderResponse {
-        logger.debug("Creating order: {}", order)
+    fun createOrder(order: Order): Order {
+        log.debug("Creating order: {}", order)
 
         return orderRepository
             .save(order)
             .also { orderSaved ->
-                logger.info("Order created: {}", orderSaved)
+                log.info("Order created: {}", orderSaved)
                 outboxEventRepository
                     .save(
                         OutboxEvent(
@@ -41,13 +40,13 @@ class OrderService(
                             aggregateType = AggregateType.ORDER,
                         ),
                     ).also {
-                        logger.info("Outbox event created: {}", it)
+                        log.info("Outbox event created: {}", it)
                     }
-            }.toResponse()
+            }
     }
 
     fun findById(orderId: UUID) =
-        orderRepository.findById(orderId)?.toResponse() ?: throw OrderNotFoundException(
+        orderRepository.findById(orderId) ?: throw OrderNotFoundException(
             HttpStatus.NOT_FOUND,
             ErrorType.ORDER_NOT_FOUND.name,
             "Order with id=$orderId not found",

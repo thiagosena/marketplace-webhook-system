@@ -9,13 +9,13 @@ import org.testcontainers.utility.DockerImageName
 
 @TestConfiguration(proxyBeanMethods = false)
 class TestcontainersConfiguration {
-    private val logger = LoggerFactory.getLogger(TestcontainersConfiguration::class.java)
+    private val log = LoggerFactory.getLogger(TestcontainersConfiguration::class.java)
 
     @Bean
     @ServiceConnection
     fun postgreContainer(): PostgreSQLContainer<*> =
         PostgreSQLContainer(DockerImageName.parse("postgres:16"))
             .also {
-                logger.info("Starting PostgreSQL container: {}", it)
+                log.info("Starting PostgreSQL container: {}", it)
             }
 }

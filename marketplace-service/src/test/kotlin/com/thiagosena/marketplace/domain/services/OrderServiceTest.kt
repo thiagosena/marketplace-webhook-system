@@ -100,7 +100,7 @@ class OrderServiceTest {
         val response = service.findById(orderId)
 
         verify(exactly = 1) { orderRepository.findById(orderId) }
-        assertEquals(orderId.toString(), response.id)
+        assertEquals(orderId, response.id)
         assertEquals(order.storeId, response.storeId)
         assertEquals(1, response.items.size)
         assertEquals(item.productName, response.items[0].productName)

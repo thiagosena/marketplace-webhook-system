@@ -1,4 +1,4 @@
-package com.thiagosena.marketplace.application.web.controllers.responses
+package com.thiagosena.marketplace.domain.responses
 
 import java.math.BigDecimal
 
