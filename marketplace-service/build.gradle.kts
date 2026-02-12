@@ -102,7 +102,7 @@ val excludePackages: Iterable<String> =
         "**/$basePath/domain/responses/**",
         "**/$basePath/domain/exceptions/**",
         "**/$basePath/resources/repositories/**",
-        "**/$basePath/MarketplaceApplication*",
+        "**/$basePath/MarketplaceApplication*"
     )
 extra["excludePackages"] = excludePackages
 
@@ -110,10 +110,7 @@ tasks.withType<Test> {
     loadEnv(environment, file("variables.test.env"))
 }
 
-fun loadEnv(
-    environment: MutableMap<String, Any>,
-    file: File,
-) {
+fun loadEnv(environment: MutableMap<String, Any>, file: File) {
     require(file.exists())
 
     file.readLines().forEach { line ->
@@ -137,7 +134,7 @@ tasks.jacocoTestReport {
     classDirectories.setFrom(
         sourceSets.main.get().output.asFileTree.matching {
             exclude(excludePackages)
-        },
+        }
     )
 }
 
@@ -160,7 +157,7 @@ tasks.jacocoTestCoverageVerification {
     classDirectories.setFrom(
         sourceSets.main.get().output.asFileTree.matching {
             exclude(excludePackages)
-        },
+        }
     )
 }
 

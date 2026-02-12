@@ -10,28 +10,27 @@ data class CreateOrderRequest(
     @field:NotBlank
     val storeId: String,
     @field:NotEmpty
-    val items: List<OrderItemRequest>,
+    val items: List<OrderItemRequest>
 ) {
-    fun toDomain() =
-        Order(
-            storeId = storeId,
-            status = OrderStatus.CREATED,
-            totalAmount = items.sumOf { it.getTotal() },
-        ).also { order ->
-            order.addItems(
-                items
-                    .let { items ->
-                        items.map { item ->
-                            OrderItem(
-                                productName = item.productName,
-                                quantity = item.quantity,
-                                unitPrice = item.unitPrice,
-                                discount = item.discount,
-                                tax = item.tax,
-                                order = order,
-                            )
-                        }
-                    }.toMutableList(),
-            )
-        }
+    fun toDomain() = Order(
+        storeId = storeId,
+        status = OrderStatus.CREATED,
+        totalAmount = items.sumOf { it.getTotal() }
+    ).also { order ->
+        order.addItems(
+            items
+                .let { items ->
+                    items.map { item ->
+                        OrderItem(
+                            productName = item.productName,
+                            quantity = item.quantity,
+                            unitPrice = item.unitPrice,
+                            discount = item.discount,
+                            tax = item.tax,
+                            order = order
+                        )
+                    }
+                }.toMutableList()
+        )
+    }
 }

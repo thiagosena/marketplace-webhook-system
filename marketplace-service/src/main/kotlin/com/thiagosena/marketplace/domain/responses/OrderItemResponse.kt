@@ -7,5 +7,5 @@ data class OrderItemResponse(
     val quantity: Int,
     val unitPrice: BigDecimal,
     val discount: BigDecimal = BigDecimal.ZERO,
-    val tax: BigDecimal = BigDecimal.ZERO,
+    val tax: BigDecimal = BigDecimal.ZERO
 )

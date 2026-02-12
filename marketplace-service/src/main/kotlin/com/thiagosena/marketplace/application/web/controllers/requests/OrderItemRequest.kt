@@ -14,21 +14,21 @@ data class OrderItemRequest(
     @field:DecimalMin(
         value = "0.01",
         inclusive = true,
-        message = "Price must be greater than 0",
+        message = "Price must be greater than 0"
     )
     val unitPrice: BigDecimal,
     @field:DecimalMin(
         value = "0.00",
         inclusive = true,
-        message = "Discount cannot be negative",
+        message = "Discount cannot be negative"
     )
     val discount: BigDecimal = BigDecimal.ZERO,
     @field:DecimalMin(
         value = "0.00",
         inclusive = true,
-        message = "Tax cannot be negative",
+        message = "Tax cannot be negative"
     )
-    val tax: BigDecimal = BigDecimal.ZERO,
+    val tax: BigDecimal = BigDecimal.ZERO
 ) {
     @JsonIgnore
     fun getSubtotal(): BigDecimal = unitPrice.multiply(BigDecimal(quantity))

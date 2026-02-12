@@ -6,8 +6,7 @@ import com.thiagosena.marketplace.resources.repositories.jpa.OutboxEventJpaRepos
 import org.springframework.stereotype.Repository
 
 @Repository
-class OutboxEventJpaRepositoryAdapter(
-    private val outboxEventJpaRepository: OutboxEventJpaRepository,
-) : OutboxEventRepository {
+class OutboxEventJpaRepositoryAdapter(private val outboxEventJpaRepository: OutboxEventJpaRepository) :
+    OutboxEventRepository {
     override fun save(outboxEvent: OutboxEvent): OutboxEvent = outboxEventJpaRepository.save(outboxEvent)
 }

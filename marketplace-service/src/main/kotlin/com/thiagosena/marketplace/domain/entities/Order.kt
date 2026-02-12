@@ -1,5 +1,15 @@
 package com.thiagosena.marketplace.domain.entities
 
+import com.thiagosena.marketplace.domain.entities.EventType.ORDER_CANCELED
+import com.thiagosena.marketplace.domain.entities.EventType.ORDER_COMPLETED
+import com.thiagosena.marketplace.domain.entities.EventType.ORDER_CREATED
+import com.thiagosena.marketplace.domain.entities.EventType.ORDER_PAID
+import com.thiagosena.marketplace.domain.entities.EventType.ORDER_SHIPPED
+import com.thiagosena.marketplace.domain.entities.OrderStatus.CANCELED
+import com.thiagosena.marketplace.domain.entities.OrderStatus.COMPLETED
+import com.thiagosena.marketplace.domain.entities.OrderStatus.CREATED
+import com.thiagosena.marketplace.domain.entities.OrderStatus.PAID
+import com.thiagosena.marketplace.domain.entities.OrderStatus.SHIPPED
 import com.thiagosena.marketplace.domain.responses.OrderItemResponse
 import com.thiagosena.marketplace.domain.responses.OrderResponse
 import jakarta.persistence.CascadeType
@@ -33,13 +43,13 @@ data class Order(
         mappedBy = "order",
         fetch = FetchType.LAZY,
         cascade = [CascadeType.PERSIST, CascadeType.MERGE],
-        orphanRemoval = true,
+        orphanRemoval = true
     )
     val items: MutableList<OrderItem> = mutableListOf(),
     @Column(name = "created_at", nullable = false, updatable = false)
     val createdAt: LocalDateTime = LocalDateTime.now(),
     @Column(name = "updated_at")
-    val updatedAt: LocalDateTime? = null,
+    val updatedAt: LocalDateTime? = null
 ) {
     fun addItem(item: OrderItem) {
         items.add(item)
@@ -62,22 +72,36 @@ data class Order(
         )
         """.trimIndent()
 
-    fun toResponse(): OrderResponse =
-        id?.let {
-            OrderResponse(
-                it.toString(),
-                storeId,
-                items.map { item ->
-                    OrderItemResponse(
-                        productName = item.productName,
-                        quantity = item.quantity,
-                        unitPrice = item.unitPrice,
-                        discount = item.discount,
-                        tax = item.tax,
-                    )
-                },
-            )
-        } ?: error("Order ID cannot be null when converting to response")
+    fun toResponse(): OrderResponse = id?.let {
+        OrderResponse(
+            it.toString(),
+            storeId,
+            items.map { item ->
+                OrderItemResponse(
+                    productName = item.productName,
+                    quantity = item.quantity,
+                    unitPrice = item.unitPrice,
+                    discount = item.discount,
+                    tax = item.tax
+                )
+            }
+        )
+    } ?: error("Order ID cannot be null when converting to response")
+
+    fun canTransitionTo(newStatus: OrderStatus): Boolean = when (status) {
+        CREATED -> newStatus in listOf(PAID, CANCELED)
+        PAID -> newStatus in listOf(SHIPPED, CANCELED)
+        SHIPPED -> newStatus == COMPLETED
+        else -> false
+    }
+
+    fun toEventTypeEnum(): EventType = when (status) {
+        CREATED -> ORDER_CREATED
+        PAID -> ORDER_PAID
+        SHIPPED -> ORDER_SHIPPED
+        COMPLETED -> ORDER_COMPLETED
+        CANCELED -> ORDER_CANCELED
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -96,5 +120,5 @@ enum class OrderStatus {
     PAID,
     SHIPPED,
     COMPLETED,
-    CANCELED,
+    CANCELED
 }

@@ -7,10 +7,10 @@ import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.Id
 import jakarta.persistence.Table
-import org.hibernate.annotations.JdbcTypeCode
-import org.hibernate.type.SqlTypes
 import java.time.LocalDateTime
 import java.util.*
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 
 @Entity
 @Table(name = "outbox_events")
@@ -38,7 +38,7 @@ data class OutboxEvent(
     @Column(name = "processed_at")
     var processedAt: LocalDateTime? = null,
     @Column(name = "last_error")
-    var lastError: String? = null,
+    var lastError: String? = null
 ) {
     override fun toString() =
         """
@@ -61,27 +61,20 @@ enum class OutboxStatus {
     PENDING,
     PROCESSING,
     SENT,
-    FAILED,
+    FAILED
 }
 
 enum class AggregateType {
-    ORDER,
+    ORDER
 }
 
-enum class EventType(
-    val type: String,
-) {
+enum class EventType(val type: String) {
     ORDER_CREATED("order.created"),
     ORDER_PAID("order.paid"),
     ORDER_SHIPPED("order.shipped"),
     ORDER_COMPLETED("order.completed"),
-    ORDER_CANCELED("order.canceled"),
-    ORDER_UNKNOWNS("order.unknowns"),
+    ORDER_CANCELED("order.canceled")
     ;
 
     override fun toString(): String = type
-
-    companion object {
-        fun fromType(type: String): EventType = entries.firstOrNull { it.type == type } ?: ORDER_UNKNOWNS
-    }
 }

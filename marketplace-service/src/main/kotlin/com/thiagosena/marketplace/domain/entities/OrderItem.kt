@@ -32,7 +32,7 @@ data class OrderItem(
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false, foreignKey = ForeignKey(name = "FK_ORDER_ID"))
-    val order: Order,
+    val order: Order
 ) {
     override fun toString() =
         """

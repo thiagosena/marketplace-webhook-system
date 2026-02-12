@@ -305,6 +305,8 @@ style:
     active: true
   OptionalUnit:
     active: true
+  UnusedImport:
+    active: true
   ProtectedMemberInFinalClass:
     active: true
   ReturnCount:

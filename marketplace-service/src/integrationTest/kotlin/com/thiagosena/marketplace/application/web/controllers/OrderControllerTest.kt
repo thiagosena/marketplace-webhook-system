@@ -4,9 +4,11 @@ import com.jayway.jsonpath.JsonPath
 import com.thiagosena.marketplace.MarketplaceApplication
 import com.thiagosena.marketplace.application.config.TestcontainersConfiguration
 import com.thiagosena.marketplace.domain.entities.EventType
+import com.thiagosena.marketplace.domain.entities.OrderStatus
 import com.thiagosena.marketplace.domain.entities.OutboxStatus
 import com.thiagosena.marketplace.resources.repositories.jpa.OrderJpaRepository
 import com.thiagosena.marketplace.resources.repositories.jpa.OutboxEventJpaRepository
+import java.util.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -20,7 +22,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.reactive.server.WebTestClient
-import java.util.*
+import org.springframework.test.web.reactive.server.expectBody
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = RANDOM_PORT, classes = [MarketplaceApplication::class])
@@ -28,7 +30,7 @@ import java.util.*
 @Import(TestcontainersConfiguration::class)
 class OrderControllerTest(
     @param:Autowired val orderJpaRepository: OrderJpaRepository,
-    @param:Autowired val outboxEventJpaRepository: OutboxEventJpaRepository,
+    @param:Autowired val outboxEventJpaRepository: OutboxEventJpaRepository
 ) {
     @LocalServerPort
     private var port: Int = 0
@@ -119,36 +121,7 @@ class OrderControllerTest(
 
     @Test
     fun `get order by id returns ok with order response`() {
-        val payload =
-            """
-            {
-              "store_id": "store-1",
-              "items": [
-                {
-                  "product_name": "Product A",
-                  "quantity": 2,
-                  "unit_price": 9.95,
-                  "discount": 1.00,
-                  "tax": 0.50
-                }
-              ]
-            }
-            """.trimIndent()
-
-        val createdOrderId =
-            webTestClient
-                .post()
-                .uri("/api/v1/orders")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(payload)
-                .exchange()
-                .expectStatus()
-                .isCreated
-                .expectBody(String::class.java)
-                .returnResult()
-                .responseBody
-                ?.let { JsonPath.read<String>(it, "$.id") }
-                ?: error("Order ID not found")
+        val createdOrderId = createOrderPayload()
 
         webTestClient
             .get()
@@ -176,4 +149,90 @@ class OrderControllerTest(
             .expectStatus()
             .isNotFound
     }
+
+    @Test
+    fun `update order status with valid transition persists order and outbox event`() {
+        val createdOrderId = createOrderPayload()
+
+        val payload =
+            """
+            {
+              "status": "PAID"
+            }
+            """.trimIndent()
+
+        webTestClient
+            .patch()
+            .uri("/api/v1/orders/$createdOrderId/status")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(payload)
+            .exchange()
+            .expectStatus()
+            .isOk
+
+        val savedOrder = orderJpaRepository.findById(UUID.fromString(createdOrderId)).orElseThrow()
+        assertThat(savedOrder.status).isEqualTo(OrderStatus.PAID)
+        assertThat(outboxEventJpaRepository.count()).isEqualTo(2)
+
+        val outboxEvent = outboxEventJpaRepository.findAll().toList().last()
+        assertThat(outboxEvent.eventType).isEqualTo(EventType.ORDER_PAID.type)
+        assertThat(outboxEvent.status).isEqualTo(OutboxStatus.PENDING)
+    }
+
+    @Test
+    fun `update order status with invalid transition returns error and does not persist`() {
+        val createdOrderId = createOrderPayload()
+        val payload =
+            """
+            {
+              "status": "SHIPPED"
+            }
+            """.trimIndent()
+
+        webTestClient
+            .patch()
+            .uri("/api/v1/orders/$createdOrderId/status")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(payload)
+            .exchange()
+            .expectStatus()
+            .is4xxClientError
+
+        val savedOrder = orderJpaRepository.findById(UUID.fromString(createdOrderId)).orElseThrow()
+        assertThat(savedOrder.status).isEqualTo(OrderStatus.CREATED)
+        assertThat(outboxEventJpaRepository.count()).isEqualTo(1)
+    }
+
+    private fun createOrderPayload(): String {
+        val createOrderPayload =
+            """
+            {
+              "store_id": "store-1",
+              "items": [
+                {
+                  "product_name": "Product A",
+                  "quantity": 2,
+                  "unit_price": 9.95,
+                  "discount": 1.00,
+                  "tax": 0.50
+                }
+              ]
+            }
+            """.trimIndent()
+        return createOrderAndGetId(createOrderPayload)
+    }
+
+    private fun createOrderAndGetId(payload: String): String = webTestClient
+        .post()
+        .uri("/api/v1/orders")
+        .contentType(MediaType.APPLICATION_JSON)
+        .bodyValue(payload)
+        .exchange()
+        .expectStatus()
+        .isCreated
+        .expectBody<String>()
+        .returnResult()
+        .responseBody
+        ?.let { JsonPath.read(it, "$.id") }
+        ?: error("Order ID not found")
 }

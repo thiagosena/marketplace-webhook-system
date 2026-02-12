@@ -13,9 +13,8 @@ class TestcontainersConfiguration {
 
     @Bean
     @ServiceConnection
-    fun postgreContainer(): PostgreSQLContainer<*> =
-        PostgreSQLContainer(DockerImageName.parse("postgres:16"))
-            .also {
-                log.info("Starting PostgreSQL container: {}", it)
-            }
+    fun postgreContainer(): PostgreSQLContainer<*> = PostgreSQLContainer(DockerImageName.parse("postgres:16"))
+        .also {
+            log.info("Starting PostgreSQL container: {}", it)
+        }
 }
