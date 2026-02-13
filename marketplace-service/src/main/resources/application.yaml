@@ -35,8 +35,11 @@ app:
   webhook:
     timeout-in-seconds: ${WEBHOOK_TIMEOUT:5}
   outbox-event:
-    max-retries: ${OUTBOX_EVENT_MAX_RETRIES:10}
+    max-retries: ${OUTBOX_EVENT_MAX_RETRIES:5}
     batch-size: ${OUTBOX_EVENT_BATCH_SIZE:100}
+    base-delay-seconds: ${OUTBOX_EVENT_BASE_DELAY:10}
+    max-delay-seconds: ${OUTBOX_EVENT_MAX_DELAY:3600}
+    max-jitter-seconds: ${OUTBOX_EVENT_JITTER_FACTOR:15}
     scheduler:
       fixed-delay: ${OUTBOX_EVENT_FIXED_DELAY:5000}
 

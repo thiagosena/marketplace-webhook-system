@@ -49,11 +49,6 @@ data class Webhook(
         require(isValidUrl(callbackUrl)) { "Invalid callback URL format" }
     }
 
-    /**
-     * Checks whether this webhook should receive events from a specific store
-     */
-    fun shouldReceiveEventsFrom(storeId: String): Boolean = active && storeIds.contains(storeId)
-
     fun toResponse() = id?.let {
         WebhookResponse(
             id,

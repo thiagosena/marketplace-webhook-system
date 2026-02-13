@@ -73,7 +73,8 @@ enum class OutboxStatus {
     PENDING,
     PROCESSING,
     SENT,
-    FAILED
+    FAILED,
+    WEBHOOK_NOT_REGISTERED
 }
 
 enum class AggregateType {

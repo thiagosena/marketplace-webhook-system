@@ -53,7 +53,7 @@ class OrderServiceTest {
         val outboxEvent = outboxSlot.captured
         assertEquals(EventType.ORDER_CREATED.type, outboxEvent.eventType)
         assertEquals("""{"id": null}""", outboxEvent.payload)
-        assertEquals(savedOrder.id, outboxEvent.aggregateId)
+        assertEquals(savedOrder.storeId, outboxEvent.aggregateId)
         assertEquals(AggregateType.ORDER, outboxEvent.aggregateType)
     }
 
@@ -67,6 +67,7 @@ class OrderServiceTest {
 
         every { orderRepository.save(order) } returns order
         every { objectMapper.writeValueAsString(order) } returns """{"id": null}"""
+        every { outboxEventRepository.save(any()) } answers { firstArg() }
 
         assertThrows(IllegalStateException::class.java) {
             service.createOrder(order)
@@ -74,7 +75,7 @@ class OrderServiceTest {
 
         verify(exactly = 1) { orderRepository.save(order) }
         verify(exactly = 1) { objectMapper.writeValueAsString(order) }
-        verify(exactly = 0) { outboxEventRepository.save(any()) }
+        verify(exactly = 1) { outboxEventRepository.save(any()) }
     }
 
     @Test
@@ -102,7 +103,7 @@ class OrderServiceTest {
         val response = service.findById(orderId)
 
         verify(exactly = 1) { orderRepository.findById(orderId) }
-        assertEquals(orderId, response.id)
+        assertEquals(orderId.toString(), response.id)
         assertEquals(order.storeId, response.storeId)
         assertEquals(1, response.items.size)
         assertEquals(item.productName, response.items[0].productName)
@@ -159,7 +160,7 @@ class OrderServiceTest {
         val outboxEvent = outboxSlot.captured
         assertEquals(EventType.ORDER_PAID.type, outboxEvent.eventType)
         assertEquals("""{"id": "$orderId"}""", outboxEvent.payload)
-        assertEquals(orderId, outboxEvent.aggregateId)
+        assertEquals(order.storeId, outboxEvent.aggregateId)
         assertEquals(AggregateType.ORDER, outboxEvent.aggregateType)
     }
 
@@ -219,6 +220,7 @@ class OrderServiceTest {
         every { orderRepository.findById(orderId) } returns order
         every { orderRepository.save(any()) } returns updatedOrder
         every { objectMapper.writeValueAsString(updatedOrder) } returns """{"id": null}"""
+        every { outboxEventRepository.save(any()) } answers { firstArg() }
 
         assertThrows(IllegalStateException::class.java) {
             service.updateOrderStatusById(orderId, OrderStatus.SHIPPED)
@@ -227,6 +229,6 @@ class OrderServiceTest {
         verify(exactly = 1) { orderRepository.findById(orderId) }
         verify(exactly = 1) { orderRepository.save(any()) }
         verify(exactly = 1) { objectMapper.writeValueAsString(updatedOrder) }
-        verify(exactly = 0) { outboxEventRepository.save(any()) }
+        verify(exactly = 1) { outboxEventRepository.save(any()) }
     }
 }

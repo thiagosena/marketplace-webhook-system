@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS orders
 (
     id           UUID PRIMARY KEY        DEFAULT gen_random_uuid(),
     store_id     VARCHAR(100)   NOT NULL,
-    status       VARCHAR(50)    NOT NULL,
+    status       VARCHAR(60)    NOT NULL,
     total_amount NUMERIC(10, 2) NOT NULL,
     created_at   TIMESTAMP      NOT NULL DEFAULT NOW(),
     updated_at   TIMESTAMP      NULL
@@ -45,10 +45,10 @@ CREATE TABLE IF NOT EXISTS outbox_events
 (
     id             UUID PRIMARY KEY      DEFAULT gen_random_uuid(),
     aggregate_id   VARCHAR(100) NOT NULL,
-    aggregate_type VARCHAR(50)  NOT NULL,
+    aggregate_type VARCHAR(60)  NOT NULL,
     event_type     VARCHAR(100) NOT NULL,
     payload        JSONB        NOT NULL,
-    status         VARCHAR(20)  NOT NULL DEFAULT 'PENDING',
+    status         VARCHAR(60)  NOT NULL DEFAULT 'PENDING',
     retry_count    INT          NOT NULL DEFAULT 0,
     next_retry_at  TIMESTAMP,
     created_at     TIMESTAMP    NOT NULL DEFAULT NOW(),

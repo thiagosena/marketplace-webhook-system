@@ -2,6 +2,8 @@ package com.thiagosena.marketplace.domain.services
 
 import com.thiagosena.marketplace.domain.entities.OutboxEvent
 import com.thiagosena.marketplace.domain.entities.Webhook
+import com.thiagosena.marketplace.domain.exceptions.ErrorType
+import com.thiagosena.marketplace.domain.exceptions.StoreNotFoundException
 import com.thiagosena.marketplace.domain.gateways.WebhookHttpGateway
 import com.thiagosena.marketplace.domain.repositories.WebhookRepository
 import com.thiagosena.marketplace.domain.responses.WebhookResponse
@@ -28,10 +30,15 @@ class WebhookService(
     }
 
     fun findRelevantWebhooksAndSend(event: OutboxEvent) {
-        webhookRepository.findActiveByStoreId(event.aggregateId).forEach { webhook ->
-            webhookHttpGateway.send(webhook.callbackUrl, event.payload).also {
-                log.info { "Webhook sent successfully: ${webhook.callbackUrl}" }
+        webhookRepository.findActiveByStoreId(event.aggregateId).takeIf { it.isNotEmpty() }?.let { webhooks ->
+            webhooks.forEach { webhook ->
+                webhookHttpGateway.send(webhook.callbackUrl, event.payload).also {
+                    log.info { "Webhook sent successfully: ${webhook.callbackUrl}" }
+                }
             }
-        }
+        } ?: throw StoreNotFoundException(
+            ErrorType.STORE_NOT_FOUND.name,
+            "No active webhooks found for storeId=${event.aggregateId}"
+        )
     }
 }

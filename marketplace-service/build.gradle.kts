@@ -12,7 +12,7 @@ val basePath = "com/thiagosena/marketplace"
 extra["springCloudVersion"] = "2025.1.1"
 group = "com.thiagosena"
 version = "1.0.0"
-description = "Receiver Management"
+description = "Marketplace Management"
 
 java {
     toolchain {

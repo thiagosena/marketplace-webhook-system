@@ -36,7 +36,7 @@ data class Order(
     val storeId: String,
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    val status: OrderStatus = OrderStatus.CREATED,
+    val status: OrderStatus = CREATED,
     @Column(name = "total_amount", nullable = false, precision = 10, scale = 2)
     val totalAmount: BigDecimal,
     @OneToMany(
@@ -76,6 +76,7 @@ data class Order(
         OrderResponse(
             it.toString(),
             storeId,
+            status,
             items.map { item ->
                 OrderItemResponse(
                     productName = item.productName,

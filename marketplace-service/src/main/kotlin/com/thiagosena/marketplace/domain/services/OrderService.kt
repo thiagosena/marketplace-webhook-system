@@ -27,23 +27,19 @@ class OrderService(
     }
 
     @Transactional
-    fun createOrder(order: Order): OrderResponse {
-        log.debug { "Creating order: $order" }
-
-        return orderRepository.save(order).also { orderSaved ->
-            log.info { "Order created: $orderSaved" }
-            outboxEventRepository.save(
-                OutboxEvent(
-                    eventType = orderSaved.toEventTypeEnum().type,
-                    payload = objectMapper.writeValueAsString(orderSaved),
-                    aggregateId = orderSaved.storeId,
-                    aggregateType = AggregateType.ORDER
-                )
-            ).also {
-                log.info { "Outbox event created: $it" }
-            }
-        }.toResponse()
-    }
+    fun createOrder(order: Order): OrderResponse = orderRepository.save(order).also { orderSaved ->
+        log.info { "Order created: $orderSaved" }
+        outboxEventRepository.save(
+            OutboxEvent(
+                eventType = orderSaved.toEventTypeEnum().type,
+                payload = objectMapper.writeValueAsString(orderSaved),
+                aggregateId = orderSaved.storeId,
+                aggregateType = AggregateType.ORDER
+            )
+        ).also {
+            log.info { "Outbox event created: $it" }
+        }
+    }.toResponse()
 
     fun findById(orderId: UUID): OrderResponse =
         orderRepository.findById(orderId)?.toResponse() ?: throw OrderNotFoundException(

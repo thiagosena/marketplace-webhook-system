@@ -3,6 +3,7 @@ package com.thiagosena.marketplace.domain.services
 import com.thiagosena.marketplace.domain.config.OutboxEventProperties
 import com.thiagosena.marketplace.domain.entities.OutboxEvent
 import com.thiagosena.marketplace.domain.entities.OutboxStatus
+import com.thiagosena.marketplace.domain.exceptions.StoreNotFoundException
 import com.thiagosena.marketplace.domain.repositories.OutboxEventRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.transaction.Transactional
@@ -37,7 +38,18 @@ class OutboxProcessorService(
     private fun processEvent(event: OutboxEvent) {
         try {
             outboxEventRepository.save(event.copy(status = OutboxStatus.PROCESSING))
-            webhookService.findRelevantWebhooksAndSend(event)
+            try {
+                webhookService.findRelevantWebhooksAndSend(event)
+            } catch (ex: StoreNotFoundException) {
+                log.error(ex) { "Failed to send outbox event $event" }
+                outboxEventRepository.save(
+                    event.copy(
+                        status = OutboxStatus.WEBHOOK_NOT_REGISTERED,
+                        processedAt = LocalDateTime.now()
+                    )
+                )
+                return
+            }
             outboxEventRepository.save(
                 event.copy(
                     status = OutboxStatus.SENT,
@@ -58,14 +70,14 @@ class OutboxProcessorService(
                 retryCount = event.retryCount + 1,
                 status = OutboxStatus.FAILED,
                 processedAt = LocalDateTime.now(),
-                lastError = ex.message
+                lastError = ex.stackTraceToString()
             )
         } else {
             event.copy(
                 retryCount = event.retryCount + 1,
-                status = OutboxStatus.FAILED,
+                status = OutboxStatus.PENDING,
                 nextRetryAt = calculateNextRetry(event.retryCount),
-                lastError = ex.message
+                lastError = ex.stackTraceToString()
             )
         }
 
@@ -73,7 +85,10 @@ class OutboxProcessorService(
     }
 
     private fun calculateNextRetry(retryCount: Int): LocalDateTime {
-        val delaySeconds = 2.0.pow(retryCount).toLong()
+        val exponential = outboxEventProperties.baseDelaySeconds * 2.0.pow(retryCount).toLong()
+        val jitter = (0..outboxEventProperties.maxJitterSeconds).random()
+        val delaySeconds = (exponential + jitter)
+            .coerceAtMost(outboxEventProperties.maxDelaySeconds.toLong())
         return LocalDateTime.now().plusSeconds(delaySeconds)
     }
 }

@@ -11,10 +11,11 @@ import org.springframework.stereotype.Repository
 interface WebhookJpaRepository : JpaRepository<Webhook, UUID> {
     @Query(
         """
-        SELECT webhook FROM Webhook webhook 
-        WHERE :storeId = ANY(webhook.storeIds)
-        AND webhook.active = true
-    """
+        SELECT * FROM webhooks
+        WHERE :storeId = ANY(store_ids)
+        AND active = true
+    """,
+        nativeQuery = true
     )
     fun findActiveByStoreId(@Param("storeId") storeId: String): List<Webhook>
 }

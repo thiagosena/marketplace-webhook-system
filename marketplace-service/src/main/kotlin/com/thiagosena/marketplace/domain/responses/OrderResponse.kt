@@ -1,3 +1,10 @@
 package com.thiagosena.marketplace.domain.responses
 
-data class OrderResponse(val id: String, val storeId: String, val items: List<OrderItemResponse>)
+import com.thiagosena.marketplace.domain.entities.OrderStatus
+
+data class OrderResponse(
+    val id: String,
+    val storeId: String,
+    val status: OrderStatus,
+    val items: List<OrderItemResponse>
+)
