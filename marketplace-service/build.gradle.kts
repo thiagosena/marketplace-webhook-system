@@ -167,6 +167,9 @@ val feignVersion = "13.7"
 val mockkVersion = "1.14.9"
 val awaitilityVersion = "4.3.0"
 val restAssuredVersion = "6.0.0"
+val logbackVersion = "1.5.29"
+val kotlinLoggingJvmVersion = "7.0.14"
+val resilience4jVersion = "2.3.0"
 dependencies {
     // Kotlin adapters
     implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -177,9 +180,15 @@ dependencies {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
     }
     implementation("org.springframework.boot:spring-boot-starter-jetty")
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocVersion")
+    implementation("io.github.resilience4j:resilience4j-spring-boot3:$resilience4jVersion")
+
+    // Logs
+    implementation("io.github.oshai:kotlin-logging-jvm:$kotlinLoggingJvmVersion")
+    implementation("ch.qos.logback:logback-classic:$logbackVersion")
 
     // Database
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")

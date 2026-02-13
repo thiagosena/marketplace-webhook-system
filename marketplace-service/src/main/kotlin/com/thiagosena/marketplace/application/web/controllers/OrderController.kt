@@ -21,18 +21,20 @@ import org.springframework.web.bind.annotation.RestController
 class OrderController(private val orderService: OrderService) {
     @PostMapping
     fun createOrder(@Valid @RequestBody createOrderRequest: CreateOrderRequest): ResponseEntity<OrderResponse> =
-        orderService.createOrder(createOrderRequest.toDomain()).let { order ->
-            ResponseEntity.status(HttpStatus.CREATED).body(order.toResponse())
+        orderService.createOrder(createOrderRequest.toDomain()).let { orderResponse ->
+            ResponseEntity.status(HttpStatus.CREATED).body(orderResponse)
         }
 
     @GetMapping("/{orderId}")
     fun getOrderById(@PathVariable orderId: UUID): ResponseEntity<OrderResponse> =
-        ResponseEntity.ok(orderService.findById(orderId).toResponse())
+        ResponseEntity.ok(orderService.findById(orderId))
 
     @PatchMapping("/{orderId}/status")
     fun updateOrderStatus(
         @PathVariable orderId: UUID,
         @RequestBody updateOrderStatusRequest: UpdateOrderStatusRequest
     ): ResponseEntity<OrderResponse> =
-        ResponseEntity.ok(orderService.updateOrderStatusById(orderId, updateOrderStatusRequest.toDomain()).toResponse())
+        orderService.updateOrderStatusById(orderId, updateOrderStatusRequest.toDomain()).let {
+            ResponseEntity.ok(it)
+        }
 }

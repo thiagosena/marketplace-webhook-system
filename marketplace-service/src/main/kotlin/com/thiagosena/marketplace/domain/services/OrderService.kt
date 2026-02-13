@@ -9,9 +9,10 @@ import com.thiagosena.marketplace.domain.exceptions.InvalidOrderStatusTransition
 import com.thiagosena.marketplace.domain.exceptions.OrderNotFoundException
 import com.thiagosena.marketplace.domain.repositories.OrderRepository
 import com.thiagosena.marketplace.domain.repositories.OutboxEventRepository
+import com.thiagosena.marketplace.domain.responses.OrderResponse
+import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.transaction.Transactional
 import java.util.*
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import tools.jackson.databind.ObjectMapper
 
@@ -21,34 +22,37 @@ class OrderService(
     private val outboxEventRepository: OutboxEventRepository,
     private val objectMapper: ObjectMapper
 ) {
-    private val log = LoggerFactory.getLogger(OrderService::class.java)
+    companion object {
+        private val log = KotlinLogging.logger {}
+    }
 
     @Transactional
-    fun createOrder(order: Order): Order {
-        log.debug("Creating order: {}", order)
+    fun createOrder(order: Order): OrderResponse {
+        log.debug { "Creating order: $order" }
 
         return orderRepository.save(order).also { orderSaved ->
-            log.info("Order created: {}", orderSaved)
+            log.info { "Order created: $orderSaved" }
             outboxEventRepository.save(
                 OutboxEvent(
                     eventType = orderSaved.toEventTypeEnum().type,
                     payload = objectMapper.writeValueAsString(orderSaved),
-                    aggregateId = orderSaved.id ?: error("Order ID cannot be null"),
+                    aggregateId = orderSaved.storeId,
                     aggregateType = AggregateType.ORDER
                 )
             ).also {
-                log.info("Outbox event created: {}", it)
+                log.info { "Outbox event created: $it" }
             }
-        }
+        }.toResponse()
     }
 
-    fun findById(orderId: UUID) = orderRepository.findById(orderId) ?: throw OrderNotFoundException(
-        ErrorType.ORDER_NOT_FOUND.name,
-        "Order with id=$orderId not found"
-    )
+    fun findById(orderId: UUID): OrderResponse =
+        orderRepository.findById(orderId)?.toResponse() ?: throw OrderNotFoundException(
+            ErrorType.ORDER_NOT_FOUND.name,
+            "Order with id=$orderId not found"
+        )
 
     @Transactional
-    fun updateOrderStatusById(orderId: UUID, orderStatus: OrderStatus): Order {
+    fun updateOrderStatusById(orderId: UUID, orderStatus: OrderStatus): OrderResponse {
         val order = orderRepository.findById(orderId)
             ?: throw OrderNotFoundException(
                 ErrorType.ORDER_NOT_FOUND.name,
@@ -67,11 +71,11 @@ class OrderService(
                 OutboxEvent(
                     eventType = orderSaved.toEventTypeEnum().type,
                     payload = objectMapper.writeValueAsString(orderSaved),
-                    aggregateId = orderSaved.id ?: error("Order ID cannot be null"),
+                    aggregateId = orderSaved.storeId,
                     aggregateType = AggregateType.ORDER
                 )
             )
-            log.info("Order status updated from: {} to {}", order.status, orderSaved.status)
-        }
+            log.info { "Order status updated from: ${order.status} to ${orderSaved.status}" }
+        }.toResponse()
     }
 }

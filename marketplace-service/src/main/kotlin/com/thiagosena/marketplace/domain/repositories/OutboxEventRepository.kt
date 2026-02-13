@@ -4,4 +4,5 @@ import com.thiagosena.marketplace.domain.entities.OutboxEvent
 
 interface OutboxEventRepository {
     fun save(outboxEvent: OutboxEvent): OutboxEvent
+    fun findPendingEventsForUpdate(maxRetries: Int, batchSize: Int): List<OutboxEvent>
 }

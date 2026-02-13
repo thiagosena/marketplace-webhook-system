@@ -9,4 +9,7 @@ import org.springframework.stereotype.Repository
 class OutboxEventJpaRepositoryAdapter(private val outboxEventJpaRepository: OutboxEventJpaRepository) :
     OutboxEventRepository {
     override fun save(outboxEvent: OutboxEvent): OutboxEvent = outboxEventJpaRepository.save(outboxEvent)
+
+    override fun findPendingEventsForUpdate(maxRetries: Int, batchSize: Int): List<OutboxEvent> =
+        outboxEventJpaRepository.findPendingEventsForUpdate(maxRetries, batchSize)
 }

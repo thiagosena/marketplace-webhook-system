@@ -1,6 +1,6 @@
 package com.thiagosena.marketplace.application.config
 
-import org.slf4j.LoggerFactory
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.springframework.context.annotation.Bean
@@ -9,12 +9,12 @@ import org.testcontainers.utility.DockerImageName
 
 @TestConfiguration(proxyBeanMethods = false)
 class TestcontainersConfiguration {
-    private val log = LoggerFactory.getLogger(TestcontainersConfiguration::class.java)
+    private val log = KotlinLogging.logger {}
 
     @Bean
     @ServiceConnection
     fun postgreContainer(): PostgreSQLContainer<*> = PostgreSQLContainer(DockerImageName.parse("postgres:16"))
         .also {
-            log.info("Starting PostgreSQL container: {}", it)
+            log.info { "Starting PostgreSQL container: $it" }
         }
 }
