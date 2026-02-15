@@ -1,4 +1,4 @@
-package com.thiagosena.marketplace
+package com.thiagosena.receiver
 
 import com.tngtech.archunit.core.importer.ClassFileImporter
 import com.tngtech.archunit.library.Architectures.layeredArchitecture
@@ -11,7 +11,7 @@ class LayeredPatternTest {
         const val RESOURCES = "resources"
     }
 
-    private val classes = ClassFileImporter().importPackages("com.thiagosena.marketplace")
+    private val classes = ClassFileImporter().importPackages("com.thiagosena.receiver")
 
     @Test
     fun `should respect layered architecture`() {

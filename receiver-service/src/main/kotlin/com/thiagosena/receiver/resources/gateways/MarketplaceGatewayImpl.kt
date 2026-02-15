@@ -17,6 +17,7 @@ class MarketplaceGatewayImpl(private val marketplaceClient: MarketplaceClient) :
         private val log = KotlinLogging.logger {}
     }
 
+    @Suppress("TooGenericExceptionCaught")
     @CircuitBreaker(name = "marketplaceService", fallbackMethod = "fallbackFindOrderById")
     @Retry(name = "marketplaceService")
     override fun findOrderById(orderId: String): OrderResponse {

@@ -1,0 +1,77 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: gobots-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+    volumes:
+      - gobots_postgres_data:/var/lib/postgresql/data
+      - ./init-databases.sql:/docker-entrypoint-initdb.d/init-databases.sql
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  marketplace-service:
+    build:
+      context: ../marketplace-service
+      dockerfile: docker/Dockerfile.dev
+    container_name: marketplace-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/marketplace_service
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_FLYWAY_ENABLED: true
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/actuator/health/readiness || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  receiver-service:
+    build:
+      context: ../receiver-service
+      dockerfile: docker/Dockerfile.dev
+    container_name: receiver-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/receiver_service
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_FLYWAY_ENABLED: true
+      SPRING_CLOUD_OPENFEIGN_CLIENT_CONFIG_MARKETPLACE-SERVICE_URL: http://marketplace-service:8000
+    ports:
+      - "8001:8001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8001/actuator/health/readiness || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  gobots_postgres_data:

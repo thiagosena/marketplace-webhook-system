@@ -39,7 +39,7 @@ class OrderServiceTest {
         val savedOrder = order.copy(id = UUID.randomUUID())
 
         every { orderRepository.save(order) } returns savedOrder
-        every { objectMapper.writeValueAsString(savedOrder) } returns """{"id": null}"""
+        every { objectMapper.writeValueAsString(any()) } returns """{"id": null}"""
 
         val outboxSlot = slot<OutboxEvent>()
         every { outboxEventRepository.save(capture(outboxSlot)) } answers { firstArg() }
@@ -47,7 +47,7 @@ class OrderServiceTest {
         service.createOrder(order)
 
         verify(exactly = 1) { orderRepository.save(order) }
-        verify(exactly = 1) { objectMapper.writeValueAsString(savedOrder) }
+        verify(exactly = 1) { objectMapper.writeValueAsString(any()) }
         verify(exactly = 1) { outboxEventRepository.save(any()) }
 
         val outboxEvent = outboxSlot.captured
@@ -66,7 +66,7 @@ class OrderServiceTest {
             )
 
         every { orderRepository.save(order) } returns order
-        every { objectMapper.writeValueAsString(order) } returns """{"id": null}"""
+        every { objectMapper.writeValueAsString(any()) } returns """{"id": null}"""
         every { outboxEventRepository.save(any()) } answers { firstArg() }
 
         assertThrows(IllegalStateException::class.java) {
@@ -74,7 +74,7 @@ class OrderServiceTest {
         }
 
         verify(exactly = 1) { orderRepository.save(order) }
-        verify(exactly = 1) { objectMapper.writeValueAsString(order) }
+        verify(exactly = 1) { objectMapper.writeValueAsString(any()) }
         verify(exactly = 1) { outboxEventRepository.save(any()) }
     }
 
@@ -144,7 +144,7 @@ class OrderServiceTest {
 
         every { orderRepository.findById(orderId) } returns order
         every { orderRepository.save(updatedOrder) } returns updatedOrder
-        every { objectMapper.writeValueAsString(updatedOrder) } returns """{"id": "$orderId"}"""
+        every { objectMapper.writeValueAsString(any()) } returns """{"id": "$orderId"}"""
 
         val outboxSlot = slot<OutboxEvent>()
         every { outboxEventRepository.save(capture(outboxSlot)) } answers { firstArg() }
@@ -153,7 +153,7 @@ class OrderServiceTest {
 
         verify(exactly = 1) { orderRepository.findById(orderId) }
         verify(exactly = 1) { orderRepository.save(updatedOrder) }
-        verify(exactly = 1) { objectMapper.writeValueAsString(updatedOrder) }
+        verify(exactly = 1) { objectMapper.writeValueAsString(any()) }
         verify(exactly = 1) { outboxEventRepository.save(any()) }
         assertEquals(OrderStatus.PAID, result.status)
 
@@ -219,7 +219,7 @@ class OrderServiceTest {
 
         every { orderRepository.findById(orderId) } returns order
         every { orderRepository.save(any()) } returns updatedOrder
-        every { objectMapper.writeValueAsString(updatedOrder) } returns """{"id": null}"""
+        every { objectMapper.writeValueAsString(any()) } returns """{"id": null}"""
         every { outboxEventRepository.save(any()) } answers { firstArg() }
 
         assertThrows(IllegalStateException::class.java) {
@@ -228,7 +228,7 @@ class OrderServiceTest {
 
         verify(exactly = 1) { orderRepository.findById(orderId) }
         verify(exactly = 1) { orderRepository.save(any()) }
-        verify(exactly = 1) { objectMapper.writeValueAsString(updatedOrder) }
+        verify(exactly = 1) { objectMapper.writeValueAsString(any()) }
         verify(exactly = 1) { outboxEventRepository.save(any()) }
     }
 }

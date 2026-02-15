@@ -1,0 +1,27 @@
+### Webhook: create order
+POST http://localhost:8000/api/v1/webhooks
+Content-Type: application/json
+
+{
+  "store_ids": [
+    "store-1"
+  ],
+  "callback_url": "http://receiver-service:8001/api/v1/events"
+}
+
+### Orders: create order
+POST http://localhost:8000/api/v1/orders
+Content-Type: application/json
+
+{
+  "store_id": "store-1",
+  "items": [
+    {
+      "product_name": "Placa de video RTX 5090",
+      "quantity": 1,
+      "unit_price": 8980,
+      "discount": 100,
+      "tax": 10
+    }
+  ]
+}

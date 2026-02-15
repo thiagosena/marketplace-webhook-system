@@ -15,3 +15,6 @@ ij_kotlin_imports_layout=java,javax,kotlin,*,^
 ktlint_standard_no-multi-spaces = enabled
 ktlint_standard_curly-spacing = enabled
 ktlint_code_style = android_studio
+
+[src/test/**/*.kt]
+max_line_length = off

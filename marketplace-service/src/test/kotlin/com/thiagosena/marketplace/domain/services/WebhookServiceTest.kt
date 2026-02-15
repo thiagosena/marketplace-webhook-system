@@ -10,7 +10,7 @@ import com.thiagosena.marketplace.domain.repositories.WebhookRepository
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
-import java.util.UUID
+import java.util.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
@@ -100,19 +100,17 @@ class WebhookServiceTest {
         verify(exactly = 0) { webhookHttpGateway.send(webhookB.callbackUrl, event.payload) }
     }
 
-    private fun webhook(callbackUrl: String = "https://example.com/webhook") =
-        Webhook(
-            storeIds = listOf("store-1"),
-            callbackUrl = callbackUrl,
-            active = true
-        )
+    private fun webhook(callbackUrl: String = "https://example.com/webhook") = Webhook(
+        storeIds = listOf("store-1"),
+        callbackUrl = callbackUrl,
+        active = true
+    )
 
-    private fun outboxEvent(): OutboxEvent =
-        OutboxEvent(
-            id = UUID.randomUUID(),
-            aggregateId = "store-1",
-            aggregateType = AggregateType.ORDER,
-            eventType = "order.created",
-            payload = """{"id":"1"}"""
-        )
+    private fun outboxEvent(): OutboxEvent = OutboxEvent(
+        id = UUID.randomUUID(),
+        aggregateId = "store-1",
+        aggregateType = AggregateType.ORDER,
+        eventType = "order.created",
+        payload = """{"id":"1"}"""
+    )
 }
