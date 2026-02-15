@@ -10,8 +10,8 @@ import com.thiagosena.marketplace.domain.entities.OrderStatus.COMPLETED
 import com.thiagosena.marketplace.domain.entities.OrderStatus.CREATED
 import com.thiagosena.marketplace.domain.entities.OrderStatus.PAID
 import com.thiagosena.marketplace.domain.entities.OrderStatus.SHIPPED
-import com.thiagosena.marketplace.domain.responses.OrderItemResponse
-import com.thiagosena.marketplace.domain.responses.OrderResponse
+import com.thiagosena.marketplace.domain.entities.responses.OrderItemResponse
+import com.thiagosena.marketplace.domain.entities.responses.OrderResponse
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -25,6 +25,7 @@ import jakarta.persistence.Table
 import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.util.*
+import tools.jackson.databind.ObjectMapper
 
 @Entity
 @Table(name = "orders")
@@ -32,13 +33,17 @@ data class Order(
     @Id
     @GeneratedValue
     val id: UUID? = null,
+
     @Column(name = "store_id", nullable = false)
     val storeId: String,
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     val status: OrderStatus = CREATED,
+
     @Column(name = "total_amount", nullable = false, precision = 10, scale = 2)
     val totalAmount: BigDecimal,
+
     @OneToMany(
         mappedBy = "order",
         fetch = FetchType.LAZY,
@@ -46,8 +51,10 @@ data class Order(
         orphanRemoval = true
     )
     val items: MutableList<OrderItem> = mutableListOf(),
+
     @Column(name = "created_at", nullable = false, updatable = false)
     val createdAt: LocalDateTime = LocalDateTime.now(),
+
     @Column(name = "updated_at")
     val updatedAt: LocalDateTime? = null
 ) {
@@ -88,6 +95,21 @@ data class Order(
             }
         )
     } ?: error("Order ID cannot be null when converting to response")
+
+    fun toOutboxEvent(idempotencyKey: String, objectMapper: ObjectMapper) = OutboxEvent(
+        eventType = toEventTypeEnum().type,
+        payload = objectMapper.writeValueAsString(
+            OutboxEventPayload(
+                idempotencyKey = idempotencyKey,
+                eventType = toEventTypeEnum().type,
+                orderId = id.toString(),
+                storeId = storeId,
+                createdAt = createdAt
+            )
+        ),
+        aggregateId = storeId,
+        aggregateType = AggregateType.ORDER
+    )
 
     fun canTransitionTo(newStatus: OrderStatus): Boolean = when (status) {
         CREATED -> newStatus in listOf(PAID, CANCELED)

@@ -1,7 +1,7 @@
 package com.thiagosena.marketplace.application.web.controllers
 
 import com.thiagosena.marketplace.application.web.controllers.requests.CreateWebhookRequest
-import com.thiagosena.marketplace.domain.responses.WebhookResponse
+import com.thiagosena.marketplace.domain.entities.responses.WebhookResponse
 import com.thiagosena.marketplace.domain.services.WebhookService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus

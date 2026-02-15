@@ -2,7 +2,7 @@ package com.thiagosena.marketplace.application.web.controllers
 
 import com.thiagosena.marketplace.application.web.controllers.requests.CreateOrderRequest
 import com.thiagosena.marketplace.application.web.controllers.requests.UpdateOrderStatusRequest
-import com.thiagosena.marketplace.domain.responses.OrderResponse
+import com.thiagosena.marketplace.domain.entities.responses.OrderResponse
 import com.thiagosena.marketplace.domain.services.OrderService
 import jakarta.validation.Valid
 import java.util.*

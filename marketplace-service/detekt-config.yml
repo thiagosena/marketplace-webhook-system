@@ -51,6 +51,7 @@ complexity:
   LongParameterList:
     active: true
     ignoreDefaultParameters: false
+    excludes: [ "**/test/**", "**/integrationTest/**", "**/archTest/**" ]
   MethodOverloading:
     active: true
   NestedBlockDepth:

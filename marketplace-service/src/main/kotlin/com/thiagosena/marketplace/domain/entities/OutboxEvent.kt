@@ -91,3 +91,11 @@ enum class EventType(val type: String) {
 
     override fun toString(): String = type
 }
+
+data class OutboxEventPayload(
+    val idempotencyKey: String,
+    val eventType: String,
+    val orderId: String,
+    val storeId: String,
+    val createdAt: LocalDateTime
+)

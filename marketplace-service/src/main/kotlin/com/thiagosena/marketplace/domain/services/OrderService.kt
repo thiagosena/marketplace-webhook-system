@@ -1,15 +1,13 @@
 package com.thiagosena.marketplace.domain.services
 
-import com.thiagosena.marketplace.domain.entities.AggregateType
 import com.thiagosena.marketplace.domain.entities.Order
 import com.thiagosena.marketplace.domain.entities.OrderStatus
-import com.thiagosena.marketplace.domain.entities.OutboxEvent
+import com.thiagosena.marketplace.domain.entities.responses.OrderResponse
 import com.thiagosena.marketplace.domain.exceptions.ErrorType
 import com.thiagosena.marketplace.domain.exceptions.InvalidOrderStatusTransitionException
 import com.thiagosena.marketplace.domain.exceptions.OrderNotFoundException
 import com.thiagosena.marketplace.domain.repositories.OrderRepository
 import com.thiagosena.marketplace.domain.repositories.OutboxEventRepository
-import com.thiagosena.marketplace.domain.responses.OrderResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.transaction.Transactional
 import java.util.*
@@ -28,32 +26,20 @@ class OrderService(
 
     @Transactional
     fun createOrder(order: Order): OrderResponse = orderRepository.save(order).also { orderSaved ->
-        log.info { "Order created: $orderSaved" }
         outboxEventRepository.save(
-            OutboxEvent(
-                eventType = orderSaved.toEventTypeEnum().type,
-                payload = objectMapper.writeValueAsString(orderSaved),
-                aggregateId = orderSaved.storeId,
-                aggregateType = AggregateType.ORDER
+            outboxEvent = orderSaved.toOutboxEvent(
+                idempotencyKey = generatedIdempotencyKey(orderSaved),
+                objectMapper
             )
-        ).also {
-            log.info { "Outbox event created: $it" }
-        }
+        )
+        log.info { "Order created: $orderSaved" }
     }.toResponse()
 
-    fun findById(orderId: UUID): OrderResponse =
-        orderRepository.findById(orderId)?.toResponse() ?: throw OrderNotFoundException(
-            ErrorType.ORDER_NOT_FOUND.name,
-            "Order with id=$orderId not found"
-        )
+    fun findById(orderId: UUID): OrderResponse = findOrderById(orderId).toResponse()
 
     @Transactional
     fun updateOrderStatusById(orderId: UUID, orderStatus: OrderStatus): OrderResponse {
-        val order = orderRepository.findById(orderId)
-            ?: throw OrderNotFoundException(
-                ErrorType.ORDER_NOT_FOUND.name,
-                "Order with id=$orderId not found"
-            )
+        val order = findOrderById(orderId)
 
         require(order.canTransitionTo(orderStatus)) {
             throw InvalidOrderStatusTransitionException(
@@ -64,14 +50,20 @@ class OrderService(
 
         return orderRepository.save(order.copy(status = orderStatus)).also { orderSaved ->
             outboxEventRepository.save(
-                OutboxEvent(
-                    eventType = orderSaved.toEventTypeEnum().type,
-                    payload = objectMapper.writeValueAsString(orderSaved),
-                    aggregateId = orderSaved.storeId,
-                    aggregateType = AggregateType.ORDER
+                outboxEvent = orderSaved.toOutboxEvent(
+                    idempotencyKey = generatedIdempotencyKey(orderSaved),
+                    objectMapper
                 )
             )
             log.info { "Order status updated from: ${order.status} to ${orderSaved.status}" }
         }.toResponse()
     }
+
+    private fun findOrderById(orderId: UUID) = orderRepository.findById(orderId)
+        ?: throw OrderNotFoundException(
+            ErrorType.ORDER_NOT_FOUND.name,
+            "Order with id=$orderId not found"
+        )
+
+    private fun generatedIdempotencyKey(order: Order) = "${order.toEventTypeEnum().type}-${order.id}-${order.createdAt}"
 }

@@ -2,11 +2,11 @@ package com.thiagosena.marketplace.domain.services
 
 import com.thiagosena.marketplace.domain.entities.OutboxEvent
 import com.thiagosena.marketplace.domain.entities.Webhook
+import com.thiagosena.marketplace.domain.entities.responses.WebhookResponse
 import com.thiagosena.marketplace.domain.exceptions.ErrorType
 import com.thiagosena.marketplace.domain.exceptions.StoreNotFoundException
 import com.thiagosena.marketplace.domain.gateways.WebhookHttpGateway
 import com.thiagosena.marketplace.domain.repositories.WebhookRepository
-import com.thiagosena.marketplace.domain.responses.WebhookResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service

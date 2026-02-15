@@ -19,16 +19,22 @@ data class OrderItem(
     @Id
     @GeneratedValue
     val id: UUID? = null,
+
     @Column(name = "product_name", nullable = false)
     val productName: String,
+
     @Column(name = "quantity", nullable = false)
     val quantity: Int,
+
     @Column(name = "unit_price", nullable = false, precision = 10, scale = 2)
     val unitPrice: BigDecimal,
+
     @Column(name = "discount", nullable = false, precision = 10, scale = 2)
     val discount: BigDecimal = BigDecimal.ZERO,
+
     @Column(name = "tax", nullable = false, precision = 10, scale = 2)
     val tax: BigDecimal = BigDecimal.ZERO,
+
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false, foreignKey = ForeignKey(name = "FK_ORDER_ID"))

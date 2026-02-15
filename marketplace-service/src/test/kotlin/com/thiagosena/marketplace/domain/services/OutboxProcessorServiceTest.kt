@@ -108,8 +108,8 @@ class OutboxProcessorServiceTest {
         assertEquals(2, updated.retryCount)
         assertNotNull(updated.lastError)
         assertNotNull(updated.nextRetryAt)
-        assertTrue(!updated.nextRetryAt!!.isBefore(before))
-        assertTrue(!updated.nextRetryAt!!.isAfter(after))
+        assertTrue(!(updated.nextRetryAt?.isBefore(before) ?: false))
+        assertTrue(!(updated.nextRetryAt?.isAfter(after) ?: false))
     }
 
     @Test
@@ -167,8 +167,8 @@ class OutboxProcessorServiceTest {
         assertEquals(1, updated.retryCount)
         assertNotNull(updated.lastError)
         assertNotNull(updated.nextRetryAt)
-        assertTrue(!updated.nextRetryAt!!.isBefore(before))
-        assertTrue(!updated.nextRetryAt!!.isAfter(after))
+        assertTrue(!(updated.nextRetryAt?.isBefore(before) ?: false))
+        assertTrue(!(updated.nextRetryAt?.isAfter(after) ?: false))
     }
 
     private fun outboxEvent(retryCount: Int = 0): OutboxEvent = OutboxEvent(

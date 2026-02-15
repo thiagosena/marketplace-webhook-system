@@ -1,6 +1,6 @@
 package com.thiagosena.marketplace.domain.entities
 
-import com.thiagosena.marketplace.domain.responses.WebhookResponse
+import com.thiagosena.marketplace.domain.entities.responses.WebhookResponse
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue

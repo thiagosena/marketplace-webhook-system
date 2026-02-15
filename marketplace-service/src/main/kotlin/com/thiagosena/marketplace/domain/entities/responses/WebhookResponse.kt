@@ -1,4 +1,4 @@
-package com.thiagosena.marketplace.domain.responses
+package com.thiagosena.marketplace.domain.entities.responses
 
 import java.time.LocalDateTime
 import java.util.*
