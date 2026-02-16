@@ -114,7 +114,7 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     environment: production
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push' && vars.ENABLE_DEPLOY == 'true'
 
     steps:
       - name: Checkout code
