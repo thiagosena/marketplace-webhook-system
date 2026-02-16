@@ -171,6 +171,7 @@ val awaitilityVersion = "4.3.0"
 val restAssuredVersion = "6.0.0"
 val logbackVersion = "1.5.29"
 val kotlinLoggingJvmVersion = "7.0.14"
+val resilience4jVersion = "2.3.0"
 dependencies {
     // Kotlin adapters
     implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -185,6 +186,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocVersion")
+    implementation("io.github.resilience4j:resilience4j-spring-boot3:$resilience4jVersion")
 
     // Security
     implementation("org.springframework.boot:spring-boot-starter-security")

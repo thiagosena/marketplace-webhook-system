@@ -1,6 +1,10 @@
 package com.thiagosena.marketplace.resources.gateways
 
 import com.thiagosena.marketplace.domain.config.WebhookProperties
+import io.github.resilience4j.circuitbreaker.CircuitBreaker
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry
+import io.github.resilience4j.retry.Retry
+import io.github.resilience4j.retry.RetryRegistry
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
@@ -24,15 +28,44 @@ class WebhookHttpGatewayImplTest {
         every { future.get(any<Long>(), any()) } returns "ok"
 
         val webClientBuilder = mockWebClientChain(url, payload, future)
+        val circuitBreakerRegistry = mockCircuitBreakerRegistry()
+        val retryRegistry = mockRetryRegistry()
+
         val gateway =
             WebhookHttpGatewayImpl(
                 webClientBuilder = webClientBuilder,
+                circuitBreakerRegistry = circuitBreakerRegistry,
+                retryRegistry = retryRegistry,
                 webhookProperties = webhookProperties
             )
 
         gateway.send(url, payload, "test-token-123")
 
         verify(exactly = 1) { future.get(2000, TimeUnit.MILLISECONDS) }
+    }
+
+    private fun mockCircuitBreakerRegistry(): CircuitBreakerRegistry {
+        val registry = mockk<CircuitBreakerRegistry>()
+        val circuitBreaker = mockk<CircuitBreaker>()
+
+        every { registry.circuitBreaker(any()) } returns circuitBreaker
+        every { circuitBreaker.executeSupplier<String>(any()) } answers {
+            firstArg<java.util.function.Supplier<String>>().get()
+        }
+
+        return registry
+    }
+
+    private fun mockRetryRegistry(): RetryRegistry {
+        val registry = mockk<RetryRegistry>()
+        val retry = mockk<Retry>()
+
+        every { registry.retry(any()) } returns retry
+        every { retry.executeSupplier<String>(any()) } answers {
+            firstArg<java.util.function.Supplier<String>>().get()
+        }
+
+        return registry
     }
 
     private fun mockWebClientChain(

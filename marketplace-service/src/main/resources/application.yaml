@@ -45,3 +45,20 @@ app:
   config:
     service:
       shared-secret: ${SERVICE_SHARED_SECRET:marketplace-service-secret}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      webhook:
+        slidingWindowType: COUNT_BASED
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+  retry:
+    instances:
+      webhook:
+        maxAttempts: 3
+        waitDuration: 500ms
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2.0
