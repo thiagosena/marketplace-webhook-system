@@ -1,0 +1,27 @@
+# AWS Configuration
+aws_region   = "us-east-2"
+project_name = "marketplace"
+environment  = "prod"
+
+# Network
+vpc_cidr = "10.0.0.0/16"
+
+# Database
+db_instance_class    = "db.t3.micro"
+db_allocated_storage = 20
+db_username          = "postgres"
+db_password          = "CHANGE_ME_STRONG_PASSWORD"
+marketplace_db_name  = "marketplace"
+receiver_db_name     = "receiver"
+
+# ECS - Marketplace Service
+marketplace_container_port = 8000
+marketplace_desired_count  = 2
+marketplace_cpu            = 256  # Valid: 256, 512, 1024, 2048, 4096
+marketplace_memory         = 512  # For 256 CPU: 512, 1024, 2048
+
+# ECS - Receiver Service
+receiver_container_port = 8001
+receiver_desired_count  = 2
+receiver_cpu            = 256  # Valid: 256, 512, 1024, 2048, 4096
+receiver_memory         = 512  # For 256 CPU: 512, 1024, 2048
