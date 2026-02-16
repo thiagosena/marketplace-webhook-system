@@ -1,8 +1,11 @@
 package com.thiagosena.marketplace.application.config
 
+import io.swagger.v3.oas.models.Components
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.info.Contact
 import io.swagger.v3.oas.models.info.Info
+import io.swagger.v3.oas.models.security.SecurityRequirement
+import io.swagger.v3.oas.models.security.SecurityScheme
 import org.springdoc.core.customizers.OpenApiCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -24,6 +27,19 @@ class OpenApiConfig {
                         .email("thiagosena.dev@gmail.com")
                         .url("https://thiagosena.dev")
                 )
+        )
+        .components(
+            Components()
+                .addSecuritySchemes(
+                    "jwt-token",
+                    SecurityScheme()
+                        .type(SecurityScheme.Type.APIKEY)
+                        .`in`(SecurityScheme.In.HEADER)
+                        .name("Authorization")
+                )
+        )
+        .addSecurityItem(
+            SecurityRequirement().addList("jwt-token")
         )
 
     @Bean
