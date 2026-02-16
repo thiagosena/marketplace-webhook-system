@@ -38,6 +38,8 @@ spring:
             connectTimeout: 5000
             readTimeout: 5000
           marketplace-service:
+            default-request-headers:
+                Authorization: ${MARKETPLACE_SERVICE_SHARED_SECRET:marketplace-service-secret}
             url: http://localhost:8000
             connectTimeout: 5000
             readTimeout: 5000
@@ -65,7 +67,7 @@ resilience4j:
 app:
   config:
     service:
-      shared-secret: ${SERVICE_SHARED_SECRET:change-me-in-production}
+      shared-secret: ${SERVICE_SHARED_SECRET:receiver-service-secret}
   snapshot-event:
     max-retries: ${SNAPSHOT_EVENT_MAX_RETRIES:5}
     batch-size: ${SNAPSHOT_EVENT_BATCH_SIZE:100}

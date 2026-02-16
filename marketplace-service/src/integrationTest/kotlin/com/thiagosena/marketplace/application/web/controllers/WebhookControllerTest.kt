@@ -33,6 +33,7 @@ class WebhookControllerTest(@param:Autowired val webhookJpaRepository: WebhookJp
             WebTestClient
                 .bindToServer()
                 .baseUrl("http://localhost:$port")
+                .defaultHeader("Authorization", "test-secret")
                 .build()
     }
 

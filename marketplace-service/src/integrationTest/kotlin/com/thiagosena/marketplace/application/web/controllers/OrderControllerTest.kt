@@ -43,6 +43,7 @@ class OrderControllerTest(
             WebTestClient
                 .bindToServer()
                 .baseUrl("http://localhost:$port")
+                .defaultHeader("Authorization", "test-secret")
                 .build()
     }
 

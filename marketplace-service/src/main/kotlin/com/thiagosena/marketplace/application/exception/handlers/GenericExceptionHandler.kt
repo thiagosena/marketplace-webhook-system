@@ -1,10 +1,13 @@
 package com.thiagosena.marketplace.application.exception.handlers
 
 import com.thiagosena.marketplace.application.exception.ApiError
+import com.thiagosena.marketplace.domain.exceptions.ErrorType
 import com.thiagosena.marketplace.domain.exceptions.OrderNotFoundException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.core.AuthenticationException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
@@ -16,14 +19,37 @@ class GenericExceptionHandler : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(OrderNotFoundException::class)
     fun handleOrderNotFoundException(ex: OrderNotFoundException): ResponseEntity<Any> {
-        val response = ApiError(ex.type, ex.message)
+        val response = ApiError(error = ex.type, message = ex.message)
         return ResponseEntity(response, ex.statusCode)
+    }
+
+    @ExceptionHandler(AccessDeniedException::class)
+    fun handleAccessDeniedException(ex: AccessDeniedException): ResponseEntity<Any> {
+        log.warn { "Access denied: ${ex.message}" }
+        val response = ApiError(
+            error = ErrorType.FORBIDDEN.name,
+            message = ex.message ?: "Access denied"
+        )
+        return ResponseEntity(response, HttpStatus.FORBIDDEN)
+    }
+
+    @ExceptionHandler(AuthenticationException::class)
+    fun handleAuthenticationException(ex: AuthenticationException): ResponseEntity<Any> {
+        log.warn { "Authentication failed: ${ex.message}" }
+        val response = ApiError(
+            error = ErrorType.UNAUTHORIZED.name,
+            message = ex.message ?: "Authentication required"
+        )
+        return ResponseEntity(response, HttpStatus.UNAUTHORIZED)
     }
 
     @ExceptionHandler(Exception::class)
     fun handleException(ex: Exception): ResponseEntity<Any> {
         log.error(ex) { "Error processing request" }
-        val response = ApiError(HttpStatus.INTERNAL_SERVER_ERROR.name, ex.message)
+        val response = ApiError(
+            error = HttpStatus.INTERNAL_SERVER_ERROR.name,
+            message = ex.message
+        )
         return ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 }

@@ -42,3 +42,6 @@ app:
     max-jitter-seconds: ${OUTBOX_EVENT_JITTER_FACTOR:15}
     scheduler:
       fixed-delay: ${OUTBOX_EVENT_FIXED_DELAY:5000}
+  config:
+    service:
+      shared-secret: ${SERVICE_SHARED_SECRET:marketplace-service-secret}

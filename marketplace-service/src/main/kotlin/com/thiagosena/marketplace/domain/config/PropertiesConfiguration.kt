@@ -7,7 +7,8 @@ import org.springframework.context.annotation.Configuration
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(
     OutboxEventProperties::class,
-    WebhookProperties::class
+    WebhookProperties::class,
+    AppConfigProperties::class
 )
 class PropertiesConfiguration
 
@@ -22,3 +23,6 @@ data class OutboxEventProperties(
 
 @ConfigurationProperties(prefix = "app.webhook")
 data class WebhookProperties(val timeoutInSeconds: Long)
+
+@ConfigurationProperties(prefix = "app.config.service")
+data class AppConfigProperties(val sharedSecret: String)

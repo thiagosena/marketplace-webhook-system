@@ -186,6 +186,9 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:$springdocVersion")
 
+    // Security
+    implementation("org.springframework.boot:spring-boot-starter-security")
+
     // Logs
     implementation("io.github.oshai:kotlin-logging-jvm:$kotlinLoggingJvmVersion")
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
