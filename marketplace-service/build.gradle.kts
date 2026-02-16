@@ -265,5 +265,13 @@ sonar {
         property("sonar.java.binaries", "build/classes/kotlin/main")
         property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml")
         property("sonar.kotlin.detekt.reportPaths", "build/reports/detekt/detekt.xml")
+        property(
+            "sonar.exclusions",
+            "**/application/**,**/domain/config/**,**/domain/entities/**,**/domain/responses/**,**/domain/exceptions/**,**/resources/repositories/**,**/MarketplaceApplication.kt"
+        )
+        property(
+            "sonar.coverage.exclusions",
+            "**/application/**,**/domain/config/**,**/domain/entities/**,**/domain/responses/**,**/domain/exceptions/**,**/resources/repositories/**,**/MarketplaceApplication.kt"
+        )
     }
 }

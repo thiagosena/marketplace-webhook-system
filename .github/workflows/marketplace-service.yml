@@ -89,10 +89,15 @@ jobs:
         run: |
           ./gradlew sonar \
             -Dsonar.projectKey=thiagosena_marketplace-webhook-system \
+            -Dsonar.projectName="Marketplace Webhook System" \
+            -Dsonar.moduleKey=marketplace-service \
             -Dsonar.organization=thiagosena \
             -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.sources=src/main/kotlin \
+            -Dsonar.tests=src/test/kotlin,src/integrationTest/kotlin,src/archTest/kotlin \
+            -Dsonar.java.binaries=build/classes/kotlin/main \
             -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml \
-            -Dsonar.java.binaries=build/classes \
+            -Dsonar.kotlin.detekt.reportPaths=build/reports/detekt/detekt.xml \
             --no-daemon --stacktrace --info
 
       - name: Run code quality checks
