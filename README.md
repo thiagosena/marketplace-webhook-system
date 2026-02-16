@@ -198,6 +198,27 @@ docker-compose down -v
 
 - [**SonarCloud**](https://sonarcloud.io/project/overview?id=thiagosena_marketplace-webhook-system): Melhorar a qualidade e segurança do código.
 
+## ☁️ Terraform para provisionamento da infraestrutura na AWS
+O Terraform é uma ferramenta de Infraestrutura como Código (IaC) criada pela HashiCorp que permite criar, modificar e 
+versionar infraestrutura de forma automatizada e declarativa.
+
+Em vez de configurar servidores, redes e serviços manualmente no console da nuvem, você descreve toda a infraestrutura 
+em arquivos de código (usando a linguagem HCL – HashiCorp Configuration Language). O Terraform então interpreta esse 
+código e provisiona os recursos automaticamente em provedores como Amazon Web Services, Microsoft Azure, 
+Google Cloud Platform, entre outros.
+
+### 🚀 Principais vantagens:
+- Automação e redução de erros manuais
+- Versionamento da infraestrutura (via Git, por exemplo)
+- Reprodutibilidade de ambientes (dev, staging, produção)
+- Multicloud e multi-provider
+- Infraestrutura padronizada e escalável
+
+<p align="center">
+  <img width="600" src="docs/tf-infra-aws.png" alt="AWS Infrastructure"></img>
+  <br/>
+  <span>Figura 5: Terraform sendo executado</span>
+</p>
 
 ## 🔄 CI/CD
 O processo de execução dos testes estão sendo realizados no github action com o SonarCloud. O code deploy foi 
@@ -207,7 +228,7 @@ executados com sucesso, o github action cria as imagens e salva no ECR fazer a e
 <p align="center">
   <img width="800" src="docs/aws-infra.jpg" alt="AWS Infrastructure"></img>
   <br/>
-  <span>Figura 5: Arquitetura da infraestrutura para AWS ECS com AWS e Github Actions</span>
+  <span>Figura 6: Arquitetura da infraestrutura para AWS ECS com AWS e Github Actions</span>
 </p>
 
 ## 🔧 Troubleshooting

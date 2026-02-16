@@ -108,3 +108,30 @@ variable "receiver_memory" {
   type        = number
   default     = 512
 }
+
+# Bastion
+variable "bastion_public_key" {
+  description = "SSH public key for bastion (used to create receiver database)"
+  type        = string
+}
+
+variable "bastion_private_key" {
+  description = "SSH private key content for bastion connection (used to create receiver database)"
+  type        = string
+  sensitive   = true
+}
+
+# Service Authentication
+variable "marketplace_service_shared_secret" {
+  description = "Shared secret for marketplace service authentication"
+  type        = string
+  sensitive   = true
+  default     = "marketplace-service-secret-change-me"
+}
+
+variable "receiver_service_shared_secret" {
+  description = "Shared secret for receiver service authentication"
+  type        = string
+  sensitive   = true
+  default     = "receiver-service-secret-change-me"
+}

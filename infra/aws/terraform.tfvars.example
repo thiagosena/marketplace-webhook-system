@@ -25,3 +25,17 @@ receiver_container_port = 8001
 receiver_desired_count  = 2
 receiver_cpu            = 256  # Valid: 256, 512, 1024, 2048, 4096
 receiver_memory         = 512  # For 256 CPU: 512, 1024, 2048
+
+# Service Authentication (CHANGE THESE IN PRODUCTION!)
+marketplace_service_shared_secret = "your-strong-marketplace-secret-here"
+receiver_service_shared_secret    = "your-strong-receiver-secret-here"
+
+# Bastion (para criar database receiver automaticamente)
+# Execute: ./scripts/generate-bastion-key.sh (Linux/Mac) ou .\scripts\generate-bastion-key.bat (Windows)
+bastion_public_key = "ssh-rsa YOUR_PUBLIC_KEY_HERE bastion-temp-key"
+
+bastion_private_key = <<-EOT
+-----BEGIN OPENSSH PRIVATE KEY-----
+YOUR_PRIVATE_KEY_HERE
+-----END OPENSSH PRIVATE KEY-----
+EOT

@@ -40,7 +40,7 @@ spring:
           marketplace-service:
             default-request-headers:
                 Authorization: ${MARKETPLACE_SERVICE_SHARED_SECRET:marketplace-service-secret}
-            url: http://localhost:8000
+            url: ${MARKETPLACE_SERVICE_URL:http://localhost:8000}
             connectTimeout: 5000
             readTimeout: 5000
   web:

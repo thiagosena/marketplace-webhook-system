@@ -161,24 +161,6 @@ Após criar a infraestrutura, você precisa fazer o primeiro push das imagens:
      --force-new-deployment
    ```
 
-## Criar Database Receiver
-
-O RDS é criado com apenas o database `marketplace`. Você precisa criar o database `receiver` manualmente:
-
-1. **Conectar ao RDS**
-   ```bash
-   # Obter endpoint
-   terraform output rds_endpoint
-   
-   # Conectar (você precisará de acesso à VPC, use um bastion host ou VPN)
-   psql -h <rds-endpoint> -U postgres -d marketplace
-   ```
-
-2. **Criar database**
-   ```sql
-   CREATE DATABASE receiver;
-   ```
-
 ## Custos Estimados
 
 Custos aproximados mensais (us-east-2):

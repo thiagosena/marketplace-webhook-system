@@ -325,6 +325,10 @@ resource "aws_ecs_task_definition" "marketplace" {
         value = var.db_password
       },
       {
+        name  = "SERVICE_SHARED_SECRET"
+        value = var.marketplace_service_shared_secret
+      },
+      {
         name  = "SPRING_PROFILES_ACTIVE"
         value = "prod"
       }
@@ -337,14 +341,6 @@ resource "aws_ecs_task_definition" "marketplace" {
         "awslogs-region"        = data.aws_region.current.name
         "awslogs-stream-prefix" = "ecs"
       }
-    }
-
-    healthCheck = {
-      command     = ["CMD-SHELL", "curl -f http://localhost:${var.marketplace_container_port}/actuator/health || exit 1"]
-      interval    = 30
-      timeout     = 5
-      retries     = 3
-      startPeriod = 60
     }
   }])
 
@@ -393,6 +389,14 @@ resource "aws_ecs_task_definition" "receiver" {
         value = "http://${aws_lb.marketplace.dns_name}"
       },
       {
+        name  = "MARKETPLACE_SERVICE_SHARED_SECRET"
+        value = var.marketplace_service_shared_secret
+      },
+      {
+        name  = "SERVICE_SHARED_SECRET"
+        value = var.receiver_service_shared_secret
+      },
+      {
         name  = "SPRING_PROFILES_ACTIVE"
         value = "prod"
       }
@@ -405,14 +409,6 @@ resource "aws_ecs_task_definition" "receiver" {
         "awslogs-region"        = data.aws_region.current.name
         "awslogs-stream-prefix" = "ecs"
       }
-    }
-
-    healthCheck = {
-      command     = ["CMD-SHELL", "curl -f http://localhost:${var.receiver_container_port}/actuator/health || exit 1"]
-      interval    = 30
-      timeout     = 5
-      retries     = 3
-      startPeriod = 60
     }
   }])
 
@@ -441,6 +437,7 @@ resource "aws_ecs_service" "marketplace" {
     container_port   = var.marketplace_container_port
   }
 
+  health_check_grace_period_seconds  = 600
   deployment_maximum_percent         = 200
   deployment_minimum_healthy_percent = 100
 
@@ -473,6 +470,7 @@ resource "aws_ecs_service" "receiver" {
     container_port   = var.receiver_container_port
   }
 
+  health_check_grace_period_seconds  = 600
   deployment_maximum_percent         = 200
   deployment_minimum_healthy_percent = 100
 

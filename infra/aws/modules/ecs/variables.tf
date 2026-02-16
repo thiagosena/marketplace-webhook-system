@@ -104,3 +104,15 @@ variable "receiver_memory" {
   description = "Receiver memory in MB"
   type        = number
 }
+
+variable "marketplace_service_shared_secret" {
+  description = "Shared secret for marketplace service authentication"
+  type        = string
+  sensitive   = true
+}
+
+variable "receiver_service_shared_secret" {
+  description = "Shared secret for receiver service authentication"
+  type        = string
+  sensitive   = true
+}

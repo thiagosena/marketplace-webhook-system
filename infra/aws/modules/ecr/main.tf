@@ -13,6 +13,10 @@ resource "aws_ecr_repository" "marketplace" {
   tags = {
     Name = "${var.project_name}-marketplace-service"
   }
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "aws_ecr_repository" "receiver" {
@@ -29,6 +33,10 @@ resource "aws_ecr_repository" "receiver" {
 
   tags = {
     Name = "${var.project_name}-receiver-service"
+  }
+
+  lifecycle {
+    prevent_destroy = true
   }
 }
 

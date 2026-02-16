@@ -70,14 +70,104 @@ resource "aws_db_instance" "main" {
   }
 }
 
-# Criar database receiver após a instância estar pronta
-resource "null_resource" "create_receiver_db" {
-  depends_on = [aws_db_instance.main]
+# Key pair para o bastion
+resource "aws_key_pair" "bastion" {
+  key_name   = "${var.project_name}-${var.environment}-bastion-key"
+  public_key = var.bastion_public_key
 
+  tags = {
+    Name = "${var.project_name}-${var.environment}-bastion-key"
+  }
+}
+
+# Security group para bastion temporário
+resource "aws_security_group" "bastion" {
+  name        = "${var.project_name}-${var.environment}-bastion-sg"
+  description = "Security group for temporary bastion host"
+  vpc_id      = var.vpc_id
+
+  egress {
+    description = "Allow all outbound"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = {
+    Name = "${var.project_name}-${var.environment}-bastion-sg"
+  }
+}
+
+# Permitir conexão do bastion ao RDS
+resource "aws_security_group_rule" "rds_from_bastion" {
+  type                     = "ingress"
+  from_port                = 5432
+  to_port                  = 5432
+  protocol                 = "tcp"
+  source_security_group_id = aws_security_group.bastion.id
+  security_group_id        = aws_security_group.rds.id
+  description              = "PostgreSQL from bastion"
+}
+
+# Buscar AMI mais recente do Amazon Linux 2023
+data "aws_ami" "amazon_linux_2023" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["al2023-ami-*-x86_64"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
+# EC2 bastion temporário para criar o database
+resource "aws_instance" "bastion" {
+  ami           = data.aws_ami.amazon_linux_2023.id
+  instance_type = "t3.micro"
+  subnet_id     = var.public_subnet_ids[0]
+  key_name      = aws_key_pair.bastion.key_name
+
+  vpc_security_group_ids = [aws_security_group.bastion.id]
+
+  user_data = <<-EOF
+              #!/bin/bash
+              dnf install -y postgresql15
+              EOF
+
+  tags = {
+    Name = "${var.project_name}-${var.environment}-bastion-temp"
+  }
+
+  depends_on = [aws_db_instance.main]
+}
+
+# Criar database receiver via bastion
+resource "null_resource" "create_receiver_db" {
+  depends_on = [aws_instance.bastion, aws_security_group_rule.rds_from_bastion]
+
+  provisioner "remote-exec" {
+    inline = [
+      "until pg_isready -h ${aws_db_instance.main.address} -p ${aws_db_instance.main.port} -U ${var.db_username}; do sleep 5; done",
+      "PGPASSWORD='${var.db_password}' psql -h ${aws_db_instance.main.address} -p ${aws_db_instance.main.port} -U ${var.db_username} -d ${var.marketplace_db_name} -c \"SELECT 1 FROM pg_database WHERE datname = '${var.receiver_db_name}'\" | grep -q 1 || PGPASSWORD='${var.db_password}' psql -h ${aws_db_instance.main.address} -p ${aws_db_instance.main.port} -U ${var.db_username} -d ${var.marketplace_db_name} -c \"CREATE DATABASE ${var.receiver_db_name};\""
+    ]
+
+    connection {
+      type        = "ssh"
+      user        = "ec2-user"
+      private_key = var.bastion_private_key
+      host        = aws_instance.bastion.public_ip
+    }
+  }
+
+  # Destruir o bastion após criar o database
   provisioner "local-exec" {
-    command = <<-EOT
-      echo "Note: You need to manually create the '${var.receiver_db_name}' database"
-      echo "Connect to RDS and run: CREATE DATABASE ${var.receiver_db_name};"
-    EOT
+    when    = destroy
+    command = "echo 'Bastion will be destroyed with terraform destroy'"
   }
 }

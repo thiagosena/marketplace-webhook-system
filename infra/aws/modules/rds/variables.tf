@@ -54,3 +54,19 @@ variable "ecs_security_group_id" {
   description = "ECS security group ID"
   type        = string
 }
+
+variable "public_subnet_ids" {
+  description = "Public subnet IDs for bastion"
+  type        = list(string)
+}
+
+variable "bastion_public_key" {
+  description = "SSH public key for bastion"
+  type        = string
+}
+
+variable "bastion_private_key" {
+  description = "SSH private key for bastion connection"
+  type        = string
+  sensitive   = true
+}
