@@ -1,16 +1,19 @@
-### Event: order.created
+### Receiver Service - Event Webhook
+### Exemplo de chamada com token de serviço
+
+### 1. Enviar evento COM token válido (deve funcionar)
 POST http://localhost:8001/api/v1/events
 Content-Type: application/json
+Authorization: secret
 
 {
   "idempotency_key": "unique_key_12345",
-  "event_type": "order.created",
   "order_id": "ord_1001",
   "store_id": "store_01",
   "created_at": "2026-02-15T10:15:30"
 }
 
-### Event: order.paid
+### 2. Enviar evento SEM token (deve retornar 403)
 POST http://localhost:8001/api/v1/events
 Content-Type: application/json
 
@@ -22,9 +25,10 @@ Content-Type: application/json
   "created_at": "2026-02-15T10:18:05"
 }
 
-### Event: order.cancelled
+### 3. Enviar evento com token INVÁLIDO (deve retornar 403)
 POST http://localhost:8001/api/v1/events
 Content-Type: application/json
+Authorization: token-invalido
 
 {
   "idempotency_key": "unique_key_1234567",
@@ -33,3 +37,6 @@ Content-Type: application/json
   "order_id": "store_02",
   "created_at": "2026-02-15T11:02:41"
 }
+
+### 4. Health check (público, não precisa de token)
+GET http://localhost:8001/actuator/health

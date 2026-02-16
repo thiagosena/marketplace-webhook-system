@@ -32,7 +32,7 @@ class WebhookService(
     fun findRelevantWebhooksAndSend(event: OutboxEvent) {
         webhookRepository.findActiveByStoreId(event.aggregateId).takeIf { it.isNotEmpty() }?.let { webhooks ->
             webhooks.forEach { webhook ->
-                webhookHttpGateway.send(webhook.callbackUrl, event.payload).also {
+                webhookHttpGateway.send(webhook.callbackUrl, event.payload, webhook.token).also {
                     log.info { "Webhook sent successfully: ${webhook.callbackUrl}" }
                 }
             }

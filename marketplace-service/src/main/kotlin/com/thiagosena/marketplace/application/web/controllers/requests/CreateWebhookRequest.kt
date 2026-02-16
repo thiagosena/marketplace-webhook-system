@@ -14,7 +14,10 @@ data class CreateWebhookRequest(
         regexp = "^https?://.+",
         message = "Invalid callback URL format"
     )
-    val callbackUrl: String
+    val callbackUrl: String,
+
+    @field:NotBlank(message = "Token is required")
+    val token: String
 ) {
-    fun toDomain() = Webhook(storeIds = storeIds, callbackUrl = callbackUrl)
+    fun toDomain() = Webhook(storeIds = storeIds, callbackUrl = callbackUrl, token = token)
 }

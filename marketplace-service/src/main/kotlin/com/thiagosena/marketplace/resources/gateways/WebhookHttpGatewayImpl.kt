@@ -16,11 +16,12 @@ class WebhookHttpGatewayImpl(
     private val webhookProperties: WebhookProperties
 ) : WebhookHttpGateway {
 
-    override fun send(url: String, payload: String) {
+    override fun send(url: String, payload: String, token: String) {
         val timeoutValueInSeconds = Duration.ofSeconds(webhookProperties.timeoutInSeconds)
         webClientBuilder.build().post()
             .uri(url)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .header(HttpHeaders.AUTHORIZATION, token)
             .bodyValue(payload)
             .retrieve()
             .bodyToMono<String>()

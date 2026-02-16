@@ -58,13 +58,13 @@ class WebhookServiceTest {
         val webhookB = webhook(callbackUrl = "https://example.com/b")
 
         every { webhookRepository.findActiveByStoreId(event.aggregateId) } returns listOf(webhookA, webhookB)
-        every { webhookHttpGateway.send(any(), any()) } returns Unit
+        every { webhookHttpGateway.send(any(), any(), any()) } returns Unit
 
         service.findRelevantWebhooksAndSend(event)
 
         verify(exactly = 1) { webhookRepository.findActiveByStoreId(event.aggregateId) }
-        verify(exactly = 1) { webhookHttpGateway.send(webhookA.callbackUrl, event.payload) }
-        verify(exactly = 1) { webhookHttpGateway.send(webhookB.callbackUrl, event.payload) }
+        verify(exactly = 1) { webhookHttpGateway.send(webhookA.callbackUrl, event.payload, webhookA.token) }
+        verify(exactly = 1) { webhookHttpGateway.send(webhookB.callbackUrl, event.payload, webhookB.token) }
     }
 
     @Test
@@ -79,7 +79,7 @@ class WebhookServiceTest {
             }
 
         verify(exactly = 1) { webhookRepository.findActiveByStoreId(event.aggregateId) }
-        verify(exactly = 0) { webhookHttpGateway.send(any(), any()) }
+        verify(exactly = 0) { webhookHttpGateway.send(any(), any(), any()) }
         assertEquals(ErrorType.STORE_NOT_FOUND.name, exception.type)
     }
 
@@ -90,19 +90,26 @@ class WebhookServiceTest {
         val webhookB = webhook(callbackUrl = "https://example.com/b")
 
         every { webhookRepository.findActiveByStoreId(event.aggregateId) } returns listOf(webhookA, webhookB)
-        every { webhookHttpGateway.send(webhookA.callbackUrl, event.payload) } throws RuntimeException("boom")
+        every {
+            webhookHttpGateway.send(
+                webhookA.callbackUrl,
+                event.payload,
+                webhookA.token
+            )
+        } throws RuntimeException("boom")
 
         assertThrows(RuntimeException::class.java) {
             service.findRelevantWebhooksAndSend(event)
         }
 
-        verify(exactly = 1) { webhookHttpGateway.send(webhookA.callbackUrl, event.payload) }
-        verify(exactly = 0) { webhookHttpGateway.send(webhookB.callbackUrl, event.payload) }
+        verify(exactly = 1) { webhookHttpGateway.send(webhookA.callbackUrl, event.payload, webhookA.token) }
+        verify(exactly = 0) { webhookHttpGateway.send(webhookB.callbackUrl, event.payload, webhookB.token) }
     }
 
     private fun webhook(callbackUrl: String = "https://example.com/webhook") = Webhook(
         storeIds = listOf("store-1"),
         callbackUrl = callbackUrl,
+        token = "test-token-123",
         active = true
     )
 

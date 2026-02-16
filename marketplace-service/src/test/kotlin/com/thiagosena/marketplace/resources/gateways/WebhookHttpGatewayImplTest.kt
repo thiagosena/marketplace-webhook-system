@@ -30,7 +30,7 @@ class WebhookHttpGatewayImplTest {
                 webhookProperties = webhookProperties
             )
 
-        gateway.send(url, payload)
+        gateway.send(url, payload, "test-token-123")
 
         verify(exactly = 1) { future.get(2000, TimeUnit.MILLISECONDS) }
     }
@@ -52,6 +52,8 @@ class WebhookHttpGatewayImplTest {
         every { webClient.post() } returns requestBodyUriSpec
         every { requestBodyUriSpec.uri(url) } returns requestBodySpec
         every { requestBodySpec.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE) } returns
+            requestBodySpec
+        every { requestBodySpec.header(HttpHeaders.AUTHORIZATION, "test-token-123") } returns
             requestBodySpec
         every { requestBodySpec.bodyValue(payload) } returns requestHeadersSpec
         every { requestHeadersSpec.retrieve() } returns responseSpec

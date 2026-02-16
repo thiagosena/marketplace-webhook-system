@@ -60,6 +60,9 @@ resilience4j:
         exponentialBackoffMultiplier: 2.0
 
 app:
+  config:
+    service:
+      shared-secret: ${SERVICE_SHARED_SECRET:change-me-in-production}
   snapshot-event:
     max-retries: ${SNAPSHOT_EVENT_MAX_RETRIES:5}
     batch-size: ${SNAPSHOT_EVENT_BATCH_SIZE:100}

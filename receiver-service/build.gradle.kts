@@ -196,6 +196,12 @@ dependencies {
     implementation("io.github.oshai:kotlin-logging-jvm:$kotlinLoggingJvmVersion")
     implementation("ch.qos.logback:logback-classic:$logbackVersion")
 
+    // Security
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.security:spring-security-oauth2-resource-server")
+    implementation("io.jsonwebtoken:jjwt-api:0.13.0")
+    implementation("com.auth0:java-jwt:4.5.0")
+
     // Database
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.postgresql:postgresql")

@@ -1,4 +1,4 @@
-package com.thiagosena.marketplace.application.web.controllers
+package com.thiagosena.receiver.application.web.controllers
 
 import com.thiagosena.marketplace.application.config.TestcontainersConfiguration
 import com.thiagosena.receiver.ReceiverApplication
@@ -27,6 +27,10 @@ class EventControllerTest(@param:Autowired val eventJpaRepository: EventJpaRepos
     private var port: Int = 0
 
     private lateinit var webTestClient: WebTestClient
+
+    companion object {
+        private const val VALID_TOKEN = "test-secret-123"
+    }
 
     @BeforeEach
     fun setupWebClient() {
@@ -57,10 +61,11 @@ class EventControllerTest(@param:Autowired val eventJpaRepository: EventJpaRepos
         webTestClient
             .post()
             .uri("/api/v1/events")
+            .header("Authorization", VALID_TOKEN)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(request)
             .exchange()
-            .expectStatus().isOk
+            .expectStatus().isNoContent
 
         val savedEvent = eventJpaRepository.findAll().first()
         assertThat(savedEvent.idempotencyKey).isEqualTo("test-key-001")
@@ -85,18 +90,20 @@ class EventControllerTest(@param:Autowired val eventJpaRepository: EventJpaRepos
         webTestClient
             .post()
             .uri("/api/v1/events")
+            .header("Authorization", VALID_TOKEN)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(request)
             .exchange()
-            .expectStatus().isOk
+            .expectStatus().isNoContent
 
         webTestClient
             .post()
             .uri("/api/v1/events")
+            .header("Authorization", VALID_TOKEN)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(request)
             .exchange()
-            .expectStatus().isOk
+            .expectStatus().isNoContent
 
         val events = eventJpaRepository.findAll()
         assertThat(events).hasSize(1)
@@ -128,18 +135,20 @@ class EventControllerTest(@param:Autowired val eventJpaRepository: EventJpaRepos
         webTestClient
             .post()
             .uri("/api/v1/events")
+            .header("Authorization", VALID_TOKEN)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(request1)
             .exchange()
-            .expectStatus().isOk
+            .expectStatus().isNoContent
 
         webTestClient
             .post()
             .uri("/api/v1/events")
+            .header("Authorization", VALID_TOKEN)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(request2)
             .exchange()
-            .expectStatus().isOk
+            .expectStatus().isNoContent
 
         val events = eventJpaRepository.findAll()
         assertThat(events).hasSize(2)
@@ -159,6 +168,7 @@ class EventControllerTest(@param:Autowired val eventJpaRepository: EventJpaRepos
         webTestClient
             .post()
             .uri("/api/v1/events")
+            .header("Authorization", VALID_TOKEN)
             .contentType(MediaType.APPLICATION_JSON)
             .bodyValue(invalidRequest)
             .exchange()
@@ -183,14 +193,58 @@ class EventControllerTest(@param:Autowired val eventJpaRepository: EventJpaRepos
             webTestClient
                 .post()
                 .uri("/api/v1/events")
+                .header("Authorization", VALID_TOKEN)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .exchange()
-                .expectStatus().isOk
+                .expectStatus().isNoContent
         }
 
         val events = eventJpaRepository.findAll()
         assertThat(events).hasSize(eventTypes.size)
         assertThat(events.map { it.eventType }).containsExactlyInAnyOrderElementsOf(eventTypes)
+    }
+
+    @Test
+    fun `should return 401 when no authorization header is provided`() {
+        val request = """
+            {
+                "idempotency_key": "test-key-no-auth",
+                "event_type": "order.created",
+                "order_id": "order-123",
+                "store_id": "store-456",
+                "created_at": "2024-01-15T10:30:00"
+            }
+        """.trimIndent()
+
+        webTestClient
+            .post()
+            .uri("/api/v1/events")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(request)
+            .exchange()
+            .expectStatus().isUnauthorized
+    }
+
+    @Test
+    fun `should return 401 when invalid token is provided`() {
+        val request = """
+            {
+                "idempotency_key": "test-key-invalid-token",
+                "event_type": "order.created",
+                "order_id": "order-123",
+                "store_id": "store-456",
+                "created_at": "2024-01-15T10:30:00"
+            }
+        """.trimIndent()
+
+        webTestClient
+            .post()
+            .uri("/api/v1/events")
+            .header("Authorization", "invalid-token")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(request)
+            .exchange()
+            .expectStatus().isUnauthorized
     }
 }

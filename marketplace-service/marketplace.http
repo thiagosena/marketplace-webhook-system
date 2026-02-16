@@ -1,16 +1,17 @@
 ### Webhook: create order
-POST http://localhost:8000/api/v1/webhooks
+POST http://gobots-prod-marketplace-alb-2029629695.us-east-2.elb.amazonaws.com/api/v1/webhooks
 Content-Type: application/json
 
 {
   "store_ids": [
     "store-1"
   ],
-  "callback_url": "http://receiver-service:8001/api/v1/events"
+  "callback_url": "http://receiver-service:8001/api/v1/events",
+  "token": "secret"
 }
 
 ### Orders: create order
-POST http://localhost:8000/api/v1/orders
+POST http://gobots-prod-marketplace-alb-2029629695.us-east-2.elb.amazonaws.com/api/v1/orders
 Content-Type: application/json
 
 {

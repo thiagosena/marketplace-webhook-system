@@ -31,6 +31,12 @@ data class Webhook(
     val callbackUrl: String,
 
     /**
+     * Shared secret token for authenticating requests to the receiver.
+     */
+    @Column(name = "token", length = 255)
+    val token: String,
+
+    /**
      * Indicates whether the webhook is active or not.
      * Inactive webhooks do not receive events.
      */

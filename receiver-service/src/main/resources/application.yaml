@@ -1,5 +1,6 @@
 server:
   port: ${SERVER_PORT:8001}
+  shutdown: graceful
 
 spring:
   main:
@@ -40,6 +41,9 @@ spring:
             url: http://localhost:8000
             connectTimeout: 5000
             readTimeout: 5000
+  web:
+    resources:
+      add-mappings: false
 
 resilience4j:
   circuitbreaker:
@@ -59,6 +63,9 @@ resilience4j:
         exponentialBackoffMultiplier: 2.0
 
 app:
+  config:
+    service:
+      shared-secret: ${SERVICE_SHARED_SECRET:change-me-in-production}
   snapshot-event:
     max-retries: ${SNAPSHOT_EVENT_MAX_RETRIES:5}
     batch-size: ${SNAPSHOT_EVENT_BATCH_SIZE:100}

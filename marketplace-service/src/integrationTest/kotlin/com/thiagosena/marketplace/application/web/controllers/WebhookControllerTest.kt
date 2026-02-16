@@ -47,7 +47,8 @@ class WebhookControllerTest(@param:Autowired val webhookJpaRepository: WebhookJp
             """
             {
               "store_ids": ["store-1", "store-2"],
-              "callback_url": "https://example.com/webhooks"
+              "callback_url": "https://example.com/webhooks",
+              "token": "secret-token-123"
             }
             """.trimIndent()
 
@@ -72,6 +73,7 @@ class WebhookControllerTest(@param:Autowired val webhookJpaRepository: WebhookJp
         val webhook = webhookJpaRepository.findAll().first()
         assertThat(webhook.storeIds).containsExactly("store-1", "store-2")
         assertThat(webhook.callbackUrl).isEqualTo("https://example.com/webhooks")
+        assertThat(webhook.token).isEqualTo("secret-token-123")
         assertThat(webhook.active).isTrue()
     }
 
@@ -81,7 +83,8 @@ class WebhookControllerTest(@param:Autowired val webhookJpaRepository: WebhookJp
             """
             {
               "store_ids": [],
-              "callback_url": "https://example.com/webhooks"
+              "callback_url": "https://example.com/webhooks",
+              "token": "secret-token-123"
             }
             """.trimIndent()
 
@@ -103,7 +106,8 @@ class WebhookControllerTest(@param:Autowired val webhookJpaRepository: WebhookJp
             """
             {
               "store_ids": ["store-1"],
-              "callback_url": "ftp://example.com/webhooks"
+              "callback_url": "ftp://example.com/webhooks",
+              "token": "secret-token-123"
             }
             """.trimIndent()
 
@@ -125,7 +129,31 @@ class WebhookControllerTest(@param:Autowired val webhookJpaRepository: WebhookJp
             """
             {
               "store_ids": ["store-1"],
-              "callback_url": ""
+              "callback_url": "",
+              "token": "secret-token-123"
+            }
+            """.trimIndent()
+
+        webTestClient
+            .post()
+            .uri("/api/v1/webhooks")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(payload)
+            .exchange()
+            .expectStatus()
+            .isBadRequest
+
+        assertThat(webhookJpaRepository.count()).isEqualTo(0)
+    }
+
+    @Test
+    fun `create webhook with blank token returns bad request`() {
+        val payload =
+            """
+            {
+              "store_ids": ["store-1"],
+              "callback_url": "https://example.com/webhooks",
+              "token": ""
             }
             """.trimIndent()
 

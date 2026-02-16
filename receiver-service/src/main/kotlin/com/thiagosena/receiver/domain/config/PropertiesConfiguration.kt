@@ -6,7 +6,8 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(
-    SnapshotEventProperties::class
+    SnapshotEventProperties::class,
+    AppConfigProperties::class
 )
 class PropertiesConfiguration
 
@@ -18,3 +19,6 @@ data class SnapshotEventProperties(
     val maxDelaySeconds: Int,
     val maxJitterSeconds: Int
 )
+
+@ConfigurationProperties(prefix = "app.config.service")
+data class AppConfigProperties(val sharedSecret: String)

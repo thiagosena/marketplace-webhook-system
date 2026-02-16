@@ -29,6 +29,8 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_JPA_HIBERNATE_DDL_AUTO: validate
       SPRING_FLYWAY_ENABLED: true
+      RECEIVER_SERVICE_TOKEN: ${SERVICE_SHARED_SECRET:-dev-token-change-me}
+      SPRING_CLOUD_OPENFEIGN_CLIENT_CONFIG_RECEIVER-SERVICE_URL: http://receiver-service:8001
     ports:
       - "8000:8000"
     depends_on:
@@ -55,6 +57,7 @@ services:
       SPRING_JPA_HIBERNATE_DDL_AUTO: validate
       SPRING_FLYWAY_ENABLED: true
       SPRING_CLOUD_OPENFEIGN_CLIENT_CONFIG_MARKETPLACE-SERVICE_URL: http://marketplace-service:8000
+      SERVICE_SHARED_SECRET: ${SERVICE_SHARED_SECRET:-dev-token-change-me}
     ports:
       - "8001:8001"
     depends_on:
