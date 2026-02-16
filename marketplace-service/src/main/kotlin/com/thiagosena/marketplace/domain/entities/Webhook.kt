@@ -17,29 +17,15 @@ data class Webhook(
     @GeneratedValue(strategy = GenerationType.UUID)
     val id: UUID? = null,
 
-    /**
-     * List of store IDs that this webhook should monitor.
-     * Stored as an ARRAY in PostgreSQL.
-     */
     @Column(name = "store_ids", nullable = false, columnDefinition = "varchar(100)[]")
     val storeIds: List<String>,
 
-    /**
-     * Callback URL that will receive events via POST.
-     */
     @Column(name = "callback_url", nullable = false, length = 500)
     val callbackUrl: String,
 
-    /**
-     * Shared secret token for authenticating requests to the receiver.
-     */
     @Column(name = "token", length = 255)
     val token: String,
 
-    /**
-     * Indicates whether the webhook is active or not.
-     * Inactive webhooks do not receive events.
-     */
     @Column(nullable = false)
     val active: Boolean = true,
 

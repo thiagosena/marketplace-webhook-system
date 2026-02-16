@@ -28,3 +28,12 @@ Authorization: marketplace-service-secret
     }
   ]
 }
+
+### Orders: atualizar status da order
+PATCH http://localhost:8000/api/v1/orders/cf062c2f-0a31-472c-a34f-356f9461014f/status
+Content-Type: application/json
+Authorization: marketplace-service-secret
+
+{
+  "status": "PAID"
+}

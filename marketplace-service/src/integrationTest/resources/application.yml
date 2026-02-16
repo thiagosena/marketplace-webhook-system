@@ -7,6 +7,9 @@ spring:
     banner-mode: off
   application:
     name: marketplace-service
+  task:
+    scheduling:
+      enabled: false
   datasource:
     username: ${DATABASE_USER:test}
     password: ${DATABASE_PASSWORD:test}
