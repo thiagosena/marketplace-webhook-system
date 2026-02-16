@@ -15,6 +15,7 @@ POST http://localhost:8001/api/v1/events
 Content-Type: application/json
 
 {
+  "idempotency_key": "unique_key_123456",
   "event": "order.paid",
   "order_id": "ord_1001",
   "store_id": "store_01",
@@ -26,6 +27,7 @@ POST http://localhost:8001/api/v1/events
 Content-Type: application/json
 
 {
+  "idempotency_key": "unique_key_1234567",
   "event": "order.cancelled",
   "order_id": "ord_1002",
   "order_id": "store_02",

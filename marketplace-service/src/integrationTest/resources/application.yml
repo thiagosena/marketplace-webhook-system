@@ -17,6 +17,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        show_sql: false
         format_sql: true
         jdbc:
           batch_size: 20
@@ -25,7 +26,19 @@ spring:
     show-sql: false
   flyway:
     enabled: true
-
+    locations: classpath:db/migration/marketplace
   jackson:
     property-naming-strategy: SNAKE_CASE
     default-property-inclusion: non_null
+
+app:
+  webhook:
+    timeout-in-seconds: ${WEBHOOK_TIMEOUT:5}
+  outbox-event:
+    max-retries: ${OUTBOX_EVENT_MAX_RETRIES:5}
+    batch-size: ${OUTBOX_EVENT_BATCH_SIZE:100}
+    base-delay-seconds: ${OUTBOX_EVENT_BASE_DELAY:10}
+    max-delay-seconds: ${OUTBOX_EVENT_MAX_DELAY:3600}
+    max-jitter-seconds: ${OUTBOX_EVENT_JITTER_FACTOR:15}
+    scheduler:
+      fixed-delay: ${OUTBOX_EVENT_FIXED_DELAY:5000}

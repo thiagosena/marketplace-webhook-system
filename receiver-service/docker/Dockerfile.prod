@@ -1,0 +1,15 @@
+FROM eclipse-temurin:21-jre-alpine
+
+RUN addgroup -S spring && adduser -S spring -G spring
+
+WORKDIR /app
+
+COPY build/libs/*.jar app.jar
+
+RUN chown spring:spring app.jar
+
+USER spring
+
+EXPOSE 8001
+
+ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]

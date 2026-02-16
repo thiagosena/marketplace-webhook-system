@@ -6,6 +6,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     id("dev.detekt") version "2.0.0-alpha.2"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.1"
+    id("org.sonarqube") version "7.2.2.6593"
     jacoco
 }
 val basePath = "com/thiagosena/receiver"
@@ -252,4 +253,18 @@ tasks.withType<Test> {
     systemProperty("api.version", "1.44")
 }
 
+tasks.jar {
+    enabled = false
+}
+
 springBoot { buildInfo() }
+
+sonar {
+    properties {
+        property("sonar.sources", "src/main/kotlin")
+        property("sonar.tests", "src/test/kotlin,src/integrationTest/kotlin,src/archTest/kotlin")
+        property("sonar.java.binaries", "build/classes/kotlin/main")
+        property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml")
+        property("sonar.kotlin.detekt.reportPaths", "build/reports/detekt/detekt.xml")
+    }
+}
