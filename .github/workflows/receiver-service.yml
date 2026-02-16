@@ -18,16 +18,16 @@ on:
 
 env:
   AWS_REGION: us-east-2
-  ECR_REPOSITORY: receiver-service
-  ECS_SERVICE: receiver-service
-  ECS_CLUSTER: GOBOTS_PROD
-  ECS_TASK_DEFINITION: receiver-service
+  ECR_REPOSITORY: gobots-receiver-service
+  ECS_SERVICE: gobots-receiver-service
+  ECS_CLUSTER: gobots-prod-cluster
+  ECS_TASK_DEFINITION: gobots-receiver-service
   CONTAINER_NAME: receiver-service
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -88,9 +88,12 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           ./gradlew sonar \
-            -Dsonar.projectKey=thiagosena_marketplace \
+            -Dsonar.projectKey=thiagosena_marketplace-webhook-system \
+            -Dsonar.organization=thiagosena \
             -Dsonar.host.url=https://sonarcloud.io \
-            --no-daemon
+            -Dsonar.coverage.jacoco.xmlReportPaths=build/reports/jacoco/test/jacocoTestReport.xml \
+            -Dsonar.java.binaries=build/classes \
+            --no-daemon --stacktrace --info
 
       - name: Run code quality checks
         working-directory: ./receiver-service
@@ -112,7 +115,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
