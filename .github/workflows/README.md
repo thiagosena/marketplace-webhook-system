@@ -27,7 +27,7 @@ Os workflows estão configurados para executar testes de integração com Testco
 
 1. Durante os testes de integração, o Testcontainers:
    - Detecta o Docker disponível no runner
-   - Baixa a imagem `postgres:16` (se não estiver em cache)
+   - Baixa a imagem `postgres:18` (se não estiver em cache)
    - Inicia um container PostgreSQL temporário
    - Configura automaticamente a conexão via `@ServiceConnection`
    - Executa os testes

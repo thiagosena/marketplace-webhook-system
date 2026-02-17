@@ -72,8 +72,7 @@ echo ===================================
 echo.
 echo 1. Fazer login no ECR
 echo 2. Build e push das imagens Docker
-echo 3. Criar database 'receiver' no RDS
-echo 4. Forcar deployment dos servicos
+echo 3. Forcar deployment dos servicos
 echo.
 echo URLs dos servicos:
 terraform output marketplace_alb_dns
