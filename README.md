@@ -1,5 +1,8 @@
 <div align="center">
 
+[![Marketplace Service CI/CD](https://github.com/thiagosena/marketplace-webhook-system/actions/workflows/marketplace-service.yml/badge.svg)](https://github.com/thiagosena/marketplace-webhook-system/actions/workflows/marketplace-service.yml)
+[![Receiver Service CI/CD](https://github.com/thiagosena/marketplace-webhook-system/actions/workflows/receiver-service.yml/badge.svg)](https://github.com/thiagosena/marketplace-webhook-system/actions/workflows/receiver-service.yml)
+
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=thiagosena_marketplace-webhook-system&metric=alert_status)](https://sonarcloud.io/dashboard?id=thiagosena_marketplace-webhook-system)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=thiagosena_marketplace-webhook-system&metric=code_smells)](https://sonarcloud.io/dashboard?id=thiagosena_marketplace-webhook-system)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=thiagosena_marketplace-webhook-system&metric=coverage)](https://sonarcloud.io/dashboard?id=thiagosena_marketplace-webhook-system)
