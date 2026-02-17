@@ -86,6 +86,14 @@ resource "aws_security_group" "bastion" {
   description = "Security group for temporary bastion host"
   vpc_id      = var.vpc_id
 
+  ingress {
+    description = "SSH from anywhere"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     description = "Allow all outbound"
     from_port   = 0

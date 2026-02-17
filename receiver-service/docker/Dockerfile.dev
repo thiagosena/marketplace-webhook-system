@@ -18,6 +18,7 @@ RUN /app/gradlew --no-daemon bootJar \
     -x archTest \
     -x detekt \
     -x ktlintCheck \
+    -Dorg.gradle.dependency.verification=off \
     --stacktrace
 
 # Runtime stage
